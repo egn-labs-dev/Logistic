@@ -5,6 +5,8 @@ import json
 
 from app.main import app
 from app.security.scrubber import DataScrubber
+import uuid
+from app.security.auth import create_access_token
 
 # Створюємо базовий синхронний клієнт для швидких перевірок
 client = TestClient(app)
@@ -65,15 +67,23 @@ async def test_chat_endpoint_fail_safe_and_restoration():
 @pytest.mark.asyncio
 async def test_dispatcher_intercept_flow():
     """
-    Тест перевіряє логіку повного перехоплення чату диспетчером.
-    1. Оператор викликає /intercept.
-    2. Наступний запит від користувача в /chat має миттєво заблокувати ШІ.
+    Тест перевіряє логіку перехоплення чату АВТОРИЗОВАНИМ диспетчером.
+    1. Генерується валідний JWT токен диспетчера.
+    2. Оператор викликає /intercept з Bearer токеном.
+    3. Наступний запит від користувача в /chat має миттєво заблокувати ШІ.
     """
     org_id = "org_intercept_test"
     sess_id = "session_hitl_888"
+    mock_user_id = str(uuid.uuid4())
     
+    # Створюємо валідний JWT токен для тестування (імітація успішного логіну)
+    valid_token = create_access_token(
+        data={"sub": mock_user_id, "role": "dispatcher", "org_id": org_id}
+    )
+    auth_headers = {"Authorization": f"Bearer {valid_token}"}
+    
+    # В payload для перехоплення більше не передаємо organization_id (береться з токена)
     intercept_payload = {
-        "organization_id": org_id,
         "session_id": sess_id
     }
     
@@ -87,15 +97,24 @@ async def test_dispatcher_intercept_flow():
         # Крок 0: Симулюємо перший запит, щоб створити сесію в БД
         await ac.post("/api/v1/chat", json=user_payload)
         
-        # Крок 1: Симулюємо примусове перехоплення чату оператором
-        intercept_res = await ac.post("/api/v1/dispatcher/intercept", json=intercept_payload)
+        # Крок 1: Симулюємо примусове перехоплення чату АВТОРИЗОВАНИМ оператором
+        intercept_res = await ac.post(
+            "/api/v1/dispatcher/intercept", 
+            json=intercept_payload, 
+            headers=auth_headers
+        )
         assert intercept_res.status_code == 200
         assert intercept_res.json()["status"] == "success"
         
-        # Крок 2: Надсилаємо повідомлення від користувача в цей же чат
+        # Крок 2: Надсилаємо повідомлення від користувача в цей же чат (публічний ендпоінт)
         chat_res = await ac.post("/api/v1/chat", json=user_payload)
         
     assert chat_res.status_code == 200
     chat_data = chat_res.json()
     # Система повинна віддати системний HITL-варнінг замість звернення до ШІ
     assert "[SYSTEM: ШІ вимкнено" in chat_data["response_text"]
+
+    # Крок 3: Перевірка захисту (спроба перехоплення БЕЗ токена)
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        unauth_res = await ac.post("/api/v1/dispatcher/intercept", json=intercept_payload)
+        assert unauth_res.status_code == 401
