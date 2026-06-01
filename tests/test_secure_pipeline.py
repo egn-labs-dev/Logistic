@@ -1,11 +1,11 @@
 import pytest
+import uuid
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
 import json
 
 from app.main import app
 from app.security.scrubber import DataScrubber
-import uuid
 from app.security.auth import create_access_token
 
 # Створюємо базовий синхронний клієнт для швидких перевірок
