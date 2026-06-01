@@ -3,8 +3,9 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel
 from sqlalchemy import select, update
 from app.db.database import get_db_session_with_rls
-from app.db.models import CargoOrder
+from app.db.models import CargoOrder, ImmutableAuditLog
 from app.security.auth import SECRET_KEY, ALGORITHM, oauth2_scheme, TokenData
+from app.security.scrubber import DataScrubber
 
 router = APIRouter(prefix="/api/v1/dispatcher", tags=["Dispatcher Console (HITL)"])
 
@@ -57,3 +58,27 @@ async def intercept_chat(payload: InterceptPayload, current_user: TokenData = De
         )
         await session.execute(query)
         return {"status": "success", "message": f"Chat {payload.session_id} securely transferred to human."}
+
+@router.get("/history/{session_id}", status_code=status.HTTP_200_OK)
+async def get_chat_history(session_id: str, current_user: TokenData = Depends(require_dispatcher_role)):
+    """
+    Повертає історію переписки для конкретної сесії з де-анонімізацією на льоту.
+    """
+    async with get_db_session_with_rls(current_user.organization_id) as session:
+        query = select(ImmutableAuditLog).where(
+            ImmutableAuditLog.session_id == session_id
+        ).order_by(ImmutableAuditLog.timestamp.asc())
+        
+        result = await session.execute(query)
+        logs = result.scalars().all()
+        
+        history = []
+        for log in logs:
+            # Де-анонімізуємо на льоту для відображення реальних даних диспетчеру
+            clean_prompt = DataScrubber.deanonymize(log.clean_prompt, log.vault_snapshot)
+            clean_response = DataScrubber.deanonymize(log.clean_response, log.vault_snapshot)
+            
+            history.append({"role": "user", "text": clean_prompt, "timestamp": log.timestamp})
+            history.append({"role": "assistant", "text": clean_response, "timestamp": log.timestamp})
+            
+        return history

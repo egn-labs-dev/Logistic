@@ -1,15 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAlerts, useIntercept } from '@/hooks/useAlerts';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useAuthStore } from '@/store/authStore';
-import { LogOut, ShieldAlert, Loader2, MessageSquareWarning } from 'lucide-react';
+import { LogOut, ShieldAlert, Loader2, MessageSquareWarning, History } from 'lucide-react';
 import { toast } from 'sonner';
+import { ChatHistoryModal } from '@/components/ChatHistoryModal';
 
 export const Dashboard = () => {
   const setToken = useAuthStore((state) => state.setToken);
   const { data: alerts, isLoading, isError, error } = useAlerts();
   const interceptMutation = useIntercept();
+
+  const [historySessionId, setHistorySessionId] = useState<string | null>(null);
 
   const handleLogout = () => {
     setToken(null);
@@ -84,21 +87,38 @@ export const Dashboard = () => {
                     Human Required
                   </span>
                 </div>
-                <Button 
-                  onClick={() => interceptMutation.mutate(alert.session_id)}
-                  disabled={interceptMutation.isPending}
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                >
-                  {interceptMutation.isPending && interceptMutation.variables === alert.session_id ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : null}
-                  Перехопити контроль
-                </Button>
+                <div className="flex space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setHistorySessionId(alert.session_id)}
+                    className="border-slate-700 hover:bg-slate-800 text-slate-300"
+                  >
+                    <History className="w-4 h-4 mr-2" />
+                    Переглянути історію
+                  </Button>
+                  <Button 
+                    onClick={() => interceptMutation.mutate(alert.session_id)}
+                    disabled={interceptMutation.isPending}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    {interceptMutation.isPending && interceptMutation.variables === alert.session_id ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : null}
+                    Перехопити контроль
+                  </Button>
+                </div>
               </Card>
             ))}
           </div>
         )}
       </main>
+      
+      {/* Модальне вікно історії чату */}
+      <ChatHistoryModal 
+        sessionId={historySessionId}
+        isOpen={!!historySessionId}
+        onClose={() => setHistorySessionId(null)}
+      />
     </div>
   );
 };
