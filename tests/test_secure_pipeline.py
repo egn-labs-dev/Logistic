@@ -58,7 +58,7 @@ async def test_chat_endpoint_fail_safe_and_restoration():
     assert "session_id" in data
     assert data["session_id"] == "session_pytest_999"
     # Оскільки ключ Gemini пустий, має повернутися наш безпечний дефолтний текст
-    assert "Система обробки заявок тимчасово перевантажена" in data["response_text"]
+    assert "Вибачте, виникла технічна затримка при аналізі специфікації вантажу" in data["response_text"]
 
 
 # --- БЛОК 3: ТЕСТУВАННЯ HUMAN-IN-THE-LOOP (HITL) ---
