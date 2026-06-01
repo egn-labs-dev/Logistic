@@ -42,7 +42,7 @@ class InterceptPayload(BaseModel):
 async def get_alerts_for_human(current_user: TokenData = Depends(require_dispatcher_role)):
     """Повертає список замовлень для диспетчера. Дані ізолюються по організації з токена."""
     async with get_db_session_with_rls(current_user.organization_id) as session:
-        query = select(CargoOrder).where(CargoOrder.status == "human_required")
+        query = select(CargoOrder).where(CargoOrder.status.in_(["human_required", "human_controlled"]))
         result = await session.execute(query)
         orders = result.scalars().all()
         return [{"id": str(o.id), "session_id": o.session_id, "status": o.status} for o in orders]
@@ -82,3 +82,29 @@ async def get_chat_history(session_id: str, current_user: TokenData = Depends(re
             history.append({"role": "assistant", "text": clean_response, "timestamp": log.timestamp})
             
         return history
+
+class ManualMessage(BaseModel):
+    session_id: str
+    message: str
+
+@router.post("/send", status_code=status.HTTP_200_OK)
+async def send_manual_message(msg: ManualMessage, current_user: TokenData = Depends(require_dispatcher_role)):
+    async with get_db_session_with_rls(current_user.organization_id) as session:
+        # 1. Перевіряємо, чи чат дійсно перехоплений
+        query = select(CargoOrder).where(CargoOrder.session_id == msg.session_id)
+        order = (await session.execute(query)).scalar_one_or_none()
+        
+        if order and order.status != "human_controlled":
+             raise HTTPException(status_code=400, detail="Chat is not in human-controlled mode")
+        
+        # 2. Логуємо повідомлення диспетчера в Audit Log (як відповідь)
+        audit_entry = ImmutableAuditLog(
+            organization_id=current_user.organization_id,
+            session_id=msg.session_id,
+            clean_prompt="[MANUAL_OPERATOR]",
+            clean_response=msg.message,
+            vault_snapshot={} # Для повідомлень оператора не потрібно маскування
+        )
+        session.add(audit_entry)
+        
+        return {"status": "sent"}

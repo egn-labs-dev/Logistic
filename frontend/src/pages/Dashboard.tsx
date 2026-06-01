@@ -78,37 +78,48 @@ export const Dashboard = () => {
           </div>
         ) : (
           <div className="grid gap-4">
-            {alerts.map((alert: any) => (
-              <Card key={alert.id} className="p-5 flex justify-between items-center bg-slate-900/80 border-red-900/50 shadow-lg shadow-red-900/10">
-                <div>
-                  <p className="text-sm text-slate-400 mb-1">ID Сесії</p>
-                  <p className="font-mono text-lg text-slate-200">{alert.session_id}</p>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900/40 text-red-400 mt-2 border border-red-800">
-                    Human Required
-                  </span>
-                </div>
-                <div className="flex space-x-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => setHistorySessionId(alert.session_id)}
-                    className="border-slate-700 hover:bg-slate-800 text-slate-300"
-                  >
-                    <History className="w-4 h-4 mr-2" />
-                    Переглянути історію
-                  </Button>
-                  <Button 
-                    onClick={() => interceptMutation.mutate(alert.session_id)}
-                    disabled={interceptMutation.isPending}
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                  >
-                    {interceptMutation.isPending && interceptMutation.variables === alert.session_id ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : null}
-                    Перехопити контроль
-                  </Button>
-                </div>
-              </Card>
-            ))}
+            {alerts.map((alert: any) => {
+              const isControlled = alert.status === 'human_controlled';
+              return (
+                <Card key={alert.id} className={`p-5 flex justify-between items-center bg-slate-900/80 shadow-lg ${isControlled ? 'border-blue-900/50 shadow-blue-900/10' : 'border-red-900/50 shadow-red-900/10'}`}>
+                  <div>
+                    <p className="text-sm text-slate-400 mb-1">ID Сесії</p>
+                    <p className="font-mono text-lg text-slate-200">{alert.session_id}</p>
+                    {isControlled ? (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900/40 text-blue-400 mt-2 border border-blue-800">
+                        Human Controlled
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900/40 text-red-400 mt-2 border border-red-800">
+                        Human Required
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex space-x-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => setHistorySessionId(alert.session_id)}
+                      className="border-slate-700 hover:bg-slate-800 text-slate-300"
+                    >
+                      <History className="w-4 h-4 mr-2" />
+                      {isControlled ? "Відкрити чат" : "Переглянути історію"}
+                    </Button>
+                    {!isControlled && (
+                      <Button 
+                        onClick={() => interceptMutation.mutate(alert.session_id)}
+                        disabled={interceptMutation.isPending}
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                      >
+                        {interceptMutation.isPending && interceptMutation.variables === alert.session_id ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : null}
+                        Перехопити контроль
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         )}
       </main>
@@ -118,6 +129,7 @@ export const Dashboard = () => {
         sessionId={historySessionId}
         isOpen={!!historySessionId}
         onClose={() => setHistorySessionId(null)}
+        isHumanControlled={alerts?.find((a: any) => a.session_id === historySessionId)?.status === 'human_controlled'}
       />
     </div>
   );
