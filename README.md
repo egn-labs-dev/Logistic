@@ -17,15 +17,16 @@ Enterprise-рішення для автоматизації логістични
 Система повністю ізольована та запакована в оптимізовані Docker-образи (Multi-stage build). Для запуску на сервері вам потрібні лише встановлені Docker та Docker Compose.
 
 ### 1. Підготовка оточення
-Створіть файл `.env` у корені проекту:
-```env
-GEMINI_API_KEY=your_google_gemini_api_key
-DB_PASSWORD=your_secure_db_password
-JWT_SECRET_KEY=your_secure_random_string
+Скопіюйте еталонний файл конфігурації:
+```bash
+cp .env.example .env
 ```
+Відредагуйте `.env`, вказавши ваші реальні секрети (API ключі, надійні паролі для БД, та JWT секрет).
+
+> **УВАГА:** Ніколи не використовуйте дефолтні секрети або `Base.metadata.create_all` на продакшені! Система автоматично виконає міграції через Alembic при старті.
 
 ### 2. Збірка та запуск
-Виконайте команду для запуску системи:
+Виконайте команду для запуску системи (Production-ready з Gunicorn та Nginx SPA-роутингом):
 ```bash
 docker-compose -f docker-compose.prod.yml up --build -d
 ```

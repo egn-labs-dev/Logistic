@@ -6,8 +6,19 @@ from app.db.models import Base
 import os
 import sys
 import logging
+from pythonjsonlogger import jsonlogger
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+logHandler = logging.StreamHandler()
+formatter = jsonlogger.JsonFormatter(
+    '%(timestamp)s %(level)s %(name)s %(message)s'
+)
+logHandler.setFormatter(formatter)
+logger.addHandler(logHandler)
+
+# Disable default uvicorn loggers to prevent duplication if desired
+# logging.getLogger("uvicorn.access").disabled = True
 
 # Environment Validation
 if not os.getenv("GEMINI_API_KEY") or not os.getenv("DATABASE_URL"):
@@ -47,12 +58,9 @@ app.include_router(dispatcher_router)
 
 @app.on_event("startup")
 async def startup_event():
-    # На етапі MVP створюємо таблиці автоматично
-    # В продакшені це робитиме Alembic
-    async with engine.begin() as conn:
-        # await conn.run_sync(Base.metadata.drop_all) # Розкоментувати для ресету БД
-        await conn.run_sync(Base.metadata.create_all)
-    logging.info("База даних успішно ініціалізована.")
+    logging.info("Zero Trust Logistics API starting up...")
+    # Таблиці БД тепер створюються та мігруються через Alembic
+    # Не використовуємо Base.metadata.create_all у продакшені!
 
 @app.get("/health")
 async def health_check():

@@ -14,9 +14,10 @@ services:
     build: .
     restart: always
     depends_on: [db]
-    environment:
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - DATABASE_URL=postgresql+asyncpg://log_admin:${DB_PASSWORD}@db:5432/logistics_secure_db
+    env_file:
+      - .env
+    command: >
+      sh -c "alembic upgrade head && gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"
 
   frontend:
     build: ./frontend
