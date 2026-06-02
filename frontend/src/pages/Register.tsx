@@ -42,6 +42,7 @@ export const Register = () => {
       const { access_token } = loginRes.data;
       setToken(access_token);
       navigate('/');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.response?.status === 400) {
         setErrorMsg('Цей Email вже зареєстровано або введені дані некоректні.');

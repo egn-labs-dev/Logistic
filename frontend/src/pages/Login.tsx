@@ -34,6 +34,7 @@ export const Login = () => {
       const { access_token } = response.data;
       setToken(access_token);
       navigate('/');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.response?.status === 401 || error.response?.status === 400) {
         setErrorMsg('Невірні дані або доступ до системи призупинено.');

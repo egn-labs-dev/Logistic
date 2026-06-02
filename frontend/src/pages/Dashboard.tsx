@@ -32,6 +32,7 @@ export const Dashboard = () => {
         id: 'alerts-toast',
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alerts?.length]);
 
   return (
@@ -188,8 +189,8 @@ export const Dashboard = () => {
                     </div>
                   </div>
                   <div className="text-3xl font-bold text-white tracking-tight flex items-baseline gap-2">
-                    {isAlertsLoading ? <Loader2 className="w-6 h-6 animate-spin text-slate-600" /> : alerts?.filter(a => a.status === 'human_required').length || 0}
-                    {alerts?.filter(a => a.status === 'human_required').length > 0 && (
+                    {isAlertsLoading ? <Loader2 className="w-6 h-6 animate-spin text-slate-600" /> : alerts?.filter((a: { status: string }) => a.status === 'human_required').length || 0}
+                    {alerts?.filter((a: { status: string }) => a.status === 'human_required').length > 0 && (
                        <span className="text-xs font-normal text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20 animate-pulse">Увага</span>
                     )}
                   </div>
@@ -280,7 +281,7 @@ export const Dashboard = () => {
                       <p className="text-xs text-slate-500 mt-1">ШІ працює на 100% автономно</p>
                     </div>
                   ) : (
-                    alerts?.map((alert: any) => {
+                    alerts?.map((alert: { id: string, session_id: string, status: string }) => {
                       const isControlled = alert.status === 'human_controlled';
                       return (
                         <div 
@@ -387,7 +388,7 @@ export const Dashboard = () => {
         sessionId={historySessionId}
         isOpen={!!historySessionId}
         onClose={() => setHistorySessionId(null)}
-        isHumanControlled={alerts?.find((a: any) => a.session_id === historySessionId)?.status === 'human_controlled'}
+        isHumanControlled={alerts?.find((a: { session_id: string, status: string }) => a.session_id === historySessionId)?.status === 'human_controlled'}
       />
     </div>
   );
