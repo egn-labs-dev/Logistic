@@ -20,8 +20,10 @@ logger.addHandler(logHandler)
 # Disable default uvicorn loggers to prevent duplication if desired
 # logging.getLogger("uvicorn.access").disabled = True
 
+from app.core.config import settings
+
 # Environment Validation
-if not os.getenv("GEMINI_API_KEY") or not os.getenv("DATABASE_URL"):
+if not settings.gemini_api_key or not settings.database_url:
     logging.critical("Critical Error: Configuration Missing (GEMINI_API_KEY or DATABASE_URL not set)")
     # For MVP, if we want tests and local run to work without crashing:
     if os.getenv("TESTING") != "True" and not os.getenv("BYPASS_ENV_CHECK"):

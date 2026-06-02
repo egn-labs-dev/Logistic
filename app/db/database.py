@@ -5,11 +5,10 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 from sqlalchemy.pool import NullPool
 
-# Get Database URL from environment (default is for docker-compose)
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "postgresql+asyncpg://postgres:postgres@localhost:5434/logistics_db"
-)
+from app.core.config import settings
+
+# Get Database URL from central config (which checks Vault Agent)
+DATABASE_URL = settings.database_url
 
 # Use NullPool for tests to avoid event loop conflicts (InterfaceError)
 is_testing = os.getenv("TESTING") == "True"

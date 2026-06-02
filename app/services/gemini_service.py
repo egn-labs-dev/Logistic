@@ -6,9 +6,8 @@ from app.schemas.dispatcher import DispatcherLLMOutput, ExtractedCargoDetails
 
 class GeminiDispatcherService:
     def __init__(self):
-        # Initialize the official client. API_KEY is taken from system environment variables
-        api_key = os.getenv("GEMINI_API_KEY", "YOUR_TEMPORARY_STUB_KEY_FOR_DEV")
-        self.client = genai.Client(api_key=api_key)
+        from app.core.config import settings
+        self.client = genai.Client(api_key=settings.gemini_api_key)
         # Using a model that fits within your billing limits
         self.model_name = "gemini-3.1-flash-lite"
 

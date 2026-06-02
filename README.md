@@ -25,6 +25,8 @@ graph TD
     classDef client fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff
     classDef secure fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#fff,stroke-dasharray: 5 5
     classDef backend fill:#1e293b,stroke:#475569,stroke-width:2px,color:#fff
+    classDef sidecar fill:#ea580c,stroke:#c2410c,stroke-width:2px,color:#fff
+    classDef volume fill:#475569,stroke:#94a3b8,stroke-width:2px,color:#fff,stroke-dasharray: 2 2
     classDef ai fill:#7c3aed,stroke:#6d28d9,stroke-width:2px,color:#fff
     classDef db fill:#059669,stroke:#047857,stroke-width:2px,color:#fff
 
@@ -32,13 +34,21 @@ graph TD
     Dispatcher["Human Dispatcher Console"]:::client
 
     subgraph "Zero Trust Secure Perimeter"
-        FastAPI["FastAPI Backend"]:::backend
-        Scrubber["Data Scrubber (Anonymizer)"]:::backend
-        Vault[("Vault / Audit Log DB")]:::db
+        subgraph "Application Pod"
+            FastAPI["FastAPI Backend"]:::backend
+            Scrubber["Data Scrubber"]:::backend
+            SharedVol[("Shared Memory Volume<br/>(/vault/secrets)")]:::volume
+            VaultAgent["Vault Agent (Sidecar)"]:::sidecar
+            
+            FastAPI --> Scrubber
+            FastAPI -- "Reads Instant Token<br/>(Zero Latency)" --> SharedVol
+            VaultAgent -- "Writes/Updates Token" --> SharedVol
+        end
+        
+        Vault[("HashiCorp Vault<br/>(Cluster)")]:::db
         RLS["PostgreSQL RLS"]:::db
         
-        FastAPI --> Scrubber
-        Scrubber -- "Extracts [PHONE_0]" --> Vault
+        VaultAgent -- "Auto-Auth & Renew<br/>(Network Call)" --> Vault
     end
 
     Gemini["Google Gemini AI"]:::ai
