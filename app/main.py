@@ -58,6 +58,9 @@ app.include_router(auth_router)
 app.include_router(chat_router)
 app.include_router(dispatcher_router)
 
+from app.core.telemetry import setup_telemetry
+setup_telemetry(app)
+
 @app.on_event("startup")
 async def startup_event():
     logging.info("Zero Trust Logistics API starting up...")

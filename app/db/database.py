@@ -23,6 +23,15 @@ AsyncSessionLocal = sessionmaker(
     expire_on_commit=False,
 )
 
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+import os
+if os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT"):
+    try:
+        SQLAlchemyInstrumentor().instrument(engine=engine.sync_engine)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Failed to instrument sqlalchemy: {e}")
+
 @asynccontextmanager
 async def get_db_session_with_rls(organization_id: str):
     """
