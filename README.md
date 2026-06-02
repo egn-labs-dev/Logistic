@@ -28,20 +28,20 @@ graph TD
     classDef ai fill:#7c3aed,stroke:#6d28d9,stroke-width:2px,color:#fff
     classDef db fill:#059669,stroke:#047857,stroke-width:2px,color:#fff
 
-    Client[Truck Driver / Client]:::client
-    Dispatcher[Human Dispatcher Console]:::client
+    Client["Truck Driver / Client"]:::client
+    Dispatcher["Human Dispatcher Console"]:::client
 
     subgraph "Zero Trust Secure Perimeter"
-        FastAPI[FastAPI Backend]:::backend
-        Scrubber[Data Scrubber (Anonymizer)]:::backend
-        Vault[(Vault / Audit Log DB)]:::db
-        RLS[PostgreSQL RLS]:::db
+        FastAPI["FastAPI Backend"]:::backend
+        Scrubber["Data Scrubber (Anonymizer)"]:::backend
+        Vault[("Vault / Audit Log DB")]:::db
+        RLS["PostgreSQL RLS"]:::db
         
         FastAPI --> Scrubber
         Scrubber -- "Extracts [PHONE_0]" --> Vault
     end
 
-    Gemini[Google Gemini AI]:::ai
+    Gemini["Google Gemini AI"]:::ai
 
     %% Flow
     Client -- "My number is 099-123-45" --> FastAPI
