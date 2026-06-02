@@ -1,0 +1,74 @@
+{
+  "dashboard": {
+    "title": "Centrum Dowodzenia",
+    "alerts": "Wszystkie Incydenty",
+    "settings": "Ustawienia",
+    "dispatcher": "Dyspozytor",
+    "online": "Dostępny",
+    "logout": "Wyloguj się",
+    "operations_overview": "Przegląd Operacji",
+    "data_synced": "Dane Zsynchronizowane",
+    "kpi": {
+      "autonomy_rate": "Autonomia AI",
+      "growing_trust": "Rosnące zaufanie",
+      "response_time": "Czas Reakcji",
+      "avg_dispatcher_time": "Średni czas reakcji dyspozytora",
+      "active_incidents": "Aktywne Incydenty",
+      "attention": "Uwaga",
+      "needs_intervention": "Wymaga interwencji",
+      "savings": "Oszczędności (Godziny)",
+      "saved_by_ai": "Zaoczęndzone dzięki AI"
+    },
+    "chart": {
+      "title": "Wydajność Systemu",
+      "subtitle": "Sesje autonomiczne vs interwencje ręczne (7 dni)",
+      "autonomous": "Autonomicznie",
+      "dispatcher": "Dyspozytor",
+      "no_data": "Brak danych"
+    },
+    "live_feed": {
+      "title": "Na Żywo",
+      "active": "Aktywne",
+      "no_incidents": "Brak incydentów",
+      "ai_working": "AI działa w 100% autonomicznie",
+      "under_control": "Pod kontrolą",
+      "sos": "SOS",
+      "you_control": "Prowadzisz ten dialog. Klient czeka na odpowiedź.",
+      "ai_blocked": "AI zablokowane przez zasady Zero Trust. Przechwyć.",
+      "intercept": "Przechwyć",
+      "open_chat": "Otwórz Czat"
+    },
+    "alerts_tab": {
+      "title": "Wszystkie Incydenty",
+      "subtitle": "Szczegółowa tabela incydentów",
+      "description": "Filtrowanie, eksport i zaawansowane wyszukiwanie będą dostępne wkrótce."
+    },
+    "settings_tab": {
+      "title": "Ustawienia",
+      "subtitle": "Ustawienia Systemu",
+      "description": "Opcje powiadomień, zarządzanie profilem i klucze API zostaną dodane wkrótce."
+    }
+  },
+  "auth": {
+    "login_title": "System Dyspozytorski",
+    "email": "Adres E-mail",
+    "password": "Hasło",
+    "login_btn": "Zaloguj się",
+    "logging_in": "Logowanie...",
+    "no_account": "Nie masz konta?",
+    "register": "Zarejestruj się",
+    "register_title": "Rejestracja Dyspozytora",
+    "register_btn": "Zarejestruj się",
+    "registering": "Rejestracja...",
+    "has_account": "Masz już konto?",
+    "login": "Zaloguj się"
+  },
+  "chat": {
+    "history": "Historia Czatu",
+    "history_desc": "Pełna historia wiadomości w tej sesji.",
+    "human_controlled": "Klient czeka na odpowiedź. Czat przejęty.",
+    "type_message": "Napisz wiadomość do klienta...",
+    "error_loading": "Błąd ładowania historii czatu",
+    "sending": "Wysyłanie..."
+  }
+}

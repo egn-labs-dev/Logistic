@@ -1,0 +1,74 @@
+{
+  "dashboard": {
+    "title": "Command Center",
+    "alerts": "All Incidents",
+    "settings": "Settings",
+    "dispatcher": "Dispatcher",
+    "online": "Online",
+    "logout": "Log out",
+    "operations_overview": "Operations Overview",
+    "data_synced": "Data Synced",
+    "kpi": {
+      "autonomy_rate": "AI Autonomy Rate",
+      "growing_trust": "Growing trust",
+      "response_time": "Alert Response",
+      "avg_dispatcher_time": "Average dispatcher response time",
+      "active_incidents": "Active Incidents",
+      "attention": "Attention",
+      "needs_intervention": "Needs intervention",
+      "savings": "Savings (Hours)",
+      "saved_by_ai": "Saved by AI"
+    },
+    "chart": {
+      "title": "System Efficiency",
+      "subtitle": "Autonomous vs Manual Intercepts (7 days)",
+      "autonomous": "Autonomous",
+      "dispatcher": "Dispatcher",
+      "no_data": "No data available"
+    },
+    "live_feed": {
+      "title": "Live Feed",
+      "active": "Active",
+      "no_incidents": "No incidents",
+      "ai_working": "AI is working 100% autonomously",
+      "under_control": "Under control",
+      "sos": "SOS",
+      "you_control": "You are leading this dialog. Client is waiting.",
+      "ai_blocked": "AI blocked by Zero Trust. Interception required.",
+      "intercept": "Intercept",
+      "open_chat": "Open Chat"
+    },
+    "alerts_tab": {
+      "title": "All Incidents",
+      "subtitle": "Detailed incidents table",
+      "description": "Filtering, export and advanced search will be available in future updates."
+    },
+    "settings_tab": {
+      "title": "Settings",
+      "subtitle": "System Settings",
+      "description": "Notification options, profile management and API keys will be added soon."
+    }
+  },
+  "auth": {
+    "login_title": "Dispatch System",
+    "email": "Email Address",
+    "password": "Password",
+    "login_btn": "Sign In",
+    "logging_in": "Signing in...",
+    "no_account": "Don't have an account?",
+    "register": "Register",
+    "register_title": "Dispatcher Registration",
+    "register_btn": "Register",
+    "registering": "Registering...",
+    "has_account": "Already have an account?",
+    "login": "Sign In"
+  },
+  "chat": {
+    "history": "Chat History",
+    "history_desc": "Full message history for this session.",
+    "human_controlled": "Client is waiting for a response. Dialog intercepted.",
+    "type_message": "Type a message to the client...",
+    "error_loading": "Error loading chat history",
+    "sending": "Sending..."
+  }
+}

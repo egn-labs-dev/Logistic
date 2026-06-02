@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
+import { uk, enUS, pl } from 'date-fns/locale';
 import { Loader2, Send } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useChatHistory, useSendMessage } from '@/hooks/useHistory';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
+import { Locale } from 'date-fns';
 
 interface ChatHistoryModalProps {
   sessionId: string | null;
@@ -14,11 +17,16 @@ interface ChatHistoryModalProps {
   isHumanControlled?: boolean;
 }
 
+const locales: Record<string, Locale> = { uk, en: enUS, pl };
+
 export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled = false }: ChatHistoryModalProps) => {
   const { data: history, isLoading, isError } = useChatHistory(sessionId);
   const sendMessageMutation = useSendMessage();
   const [message, setMessage] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { t, i18n } = useTranslation();
+
+  const currentLocale = locales[i18n.language] || enUS;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -40,33 +48,32 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
         <DialogHeader>
           <DialogTitle className="text-xl text-slate-100 flex items-center justify-between pr-6">
             <span>
-              Історія діалогу <span className="text-slate-500 font-mono text-sm ml-2">{sessionId}</span>
+              {t('chat.history')} <span className="text-slate-500 font-mono text-sm ml-2">{sessionId}</span>
             </span>
             {isHumanControlled && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900/40 text-blue-400 border border-blue-800">
-                Режим ручного керування
+                {t('chat.human_controlled')}
               </span>
             )}
           </DialogTitle>
-          <DialogDescription className="sr-only">Історія переписки між клієнтом та ШІ/Диспетчером.</DialogDescription>
+          <DialogDescription className="sr-only">{t('chat.history_desc')}</DialogDescription>
         </DialogHeader>
 
         <div className="mt-4 flex-1 overflow-hidden flex flex-col">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12 text-slate-400">
               <Loader2 className="w-8 h-8 animate-spin mb-4 text-blue-500" />
-              <p>Завантаження та де-анонімізація даних...</p>
             </div>
           ) : isError ? (
             <div className="p-4 bg-red-900/20 border border-red-500/50 rounded-lg text-red-400 text-center">
-              <p>Не вдалося завантажити історію чату.</p>
+              <p>{t('chat.error_loading')}</p>
             </div>
           ) : (
             <div className="flex-1 overflow-y-auto pr-4 mb-4 min-h-[300px] custom-scrollbar">
               <div className="flex flex-col space-y-4 pb-4">
                 {history?.length === 0 ? (
                   <div className="p-12 text-center text-slate-500 border border-dashed border-slate-800 rounded-lg">
-                    Історія діалогу порожня.
+                    {t('chat.history_desc')}
                   </div>
                 ) : (
                   history?.map((msg, index) => {
@@ -75,8 +82,6 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
                     const cleanText = DOMPurify.sanitize(rawText);
                     const isUser = msg.role === 'user';
                     
-                    // Відповіді ШІ завжди зліва, клієнта - справа
-                    // Але якщо це MANUAL_OPERATOR (диспетчер) - покажемо це іншим кольором
                     return (
                       <div
                         key={index}
@@ -90,10 +95,10 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
                       >
                         <div className="text-sm opacity-70 mb-1 flex justify-between items-center">
                           <span className="font-semibold uppercase tracking-wider text-[10px]">
-                            {isUser ? 'Клієнт' : (isManual ? 'Ви (Диспетчер)' : 'ШІ')}
+                            {isUser ? 'Client' : (isManual ? t('dashboard.dispatcher') : 'AI')}
                           </span>
                           <span className="text-[10px] ml-4">
-                            {format(new Date(msg.timestamp), 'HH:mm:ss')}
+                            {format(new Date(msg.timestamp), 'p', { locale: currentLocale })}
                           </span>
                         </div>
                         <p className="whitespace-pre-wrap text-sm leading-relaxed">{cleanText}</p>
@@ -111,7 +116,7 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
               <Input
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Введіть повідомлення для клієнта..."
+                placeholder={t('chat.type_message')}
                 className="bg-slate-900 border-slate-700 text-slate-200 focus-visible:ring-blue-500"
                 disabled={sendMessageMutation.isPending}
               />
