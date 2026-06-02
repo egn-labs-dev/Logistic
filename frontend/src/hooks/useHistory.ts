@@ -16,7 +16,7 @@ export const useChatHistory = (sessionId: string | null) => {
       return res.data;
     },
     enabled: !!sessionId,
-    refetchInterval: sessionId ? 3000 : false, // Пулінг для "живого" чату
+    refetchInterval: sessionId ? 3000 : false, // Polling for "live" chat
   });
 };
 
@@ -26,7 +26,7 @@ export const useSendMessage = () => {
     mutationFn: ({ sessionId, message }: { sessionId: string; message: string }) => 
       apiClient.post('/dispatcher/send', { session_id: sessionId, message }),
     onSuccess: (_, { sessionId }) => {
-      // Оновлюємо історію одразу після відправки
+      // Update history immediately after sending
       queryClient.invalidateQueries({ queryKey: ['history', sessionId] });
     }
   });

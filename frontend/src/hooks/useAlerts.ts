@@ -9,7 +9,7 @@ export const useAlerts = () => {
       const res = await apiClient.get('/dispatcher/alerts');
       return res.data;
     },
-    refetchInterval: 5000, // Реал-тайм пулінг кожні 5 сек
+    refetchInterval: 5000, // Real-time polling every 5 seconds
   });
 };
 

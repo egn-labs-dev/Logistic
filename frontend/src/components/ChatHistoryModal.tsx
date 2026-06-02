@@ -89,8 +89,8 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
                           isUser
                             ? 'bg-blue-600 text-white self-end rounded-tr-sm'
                             : isManual
-                              ? 'bg-indigo-600/90 text-white self-end rounded-tr-sm border border-indigo-500' // Диспетчер
-                              : 'bg-slate-800 text-slate-200 self-start rounded-tl-sm border border-slate-700' // ШІ
+                              ? 'bg-indigo-600/90 text-white self-end rounded-tr-sm border border-indigo-500' // Dispatcher
+                              : 'bg-slate-800 text-slate-200 self-start rounded-tl-sm border border-slate-700' // AI
                         }`}
                       >
                         <div className="text-sm opacity-70 mb-1 flex justify-between items-center">
