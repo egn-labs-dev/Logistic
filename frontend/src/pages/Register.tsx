@@ -12,6 +12,7 @@ export const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [orgId, setOrgId] = useState('');
+  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const setToken = useAuthStore((state) => state.setToken);
@@ -115,6 +116,20 @@ export const Register = () => {
             <p className="text-[11px] text-slate-400">Цей ID використовується для ізоляції бази даних (RLS).</p>
           </div>
 
+          <div className="flex items-start space-x-2 pt-2">
+            <input 
+              type="checkbox" 
+              id="terms" 
+              className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              required
+            />
+            <label htmlFor="terms" className="text-xs text-slate-500 leading-tight">
+              Я погоджуюсь з <Link to="/terms" className="text-indigo-600 hover:underline" target="_blank">Terms of Service</Link> та <Link to="/privacy" className="text-indigo-600 hover:underline" target="_blank">Privacy Policy</Link>. Я розумію, що система використовує LLM, а всі персональні дані проходять попередню обробку через Data Scrubber.
+            </label>
+          </div>
+
           {errorMsg && (
             <div className="p-3 bg-red-50 rounded-md border border-red-100 flex items-start space-x-2">
               <Lock className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
@@ -122,7 +137,7 @@ export const Register = () => {
             </div>
           )}
 
-          <Button type="submit" className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 mt-6 transition-colors shadow-md shadow-indigo-200" disabled={loading}>
+          <Button type="submit" className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 mt-6 transition-colors shadow-md shadow-indigo-200" disabled={loading || !agreed}>
             {loading ? (
               <><Loader2 className="animate-spin w-5 h-5 mr-2" /> {t('auth.registering')}</>
             ) : (

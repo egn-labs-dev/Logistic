@@ -4,7 +4,10 @@ import { Login } from '@/pages/Login';
 import { Register } from '@/pages/Register';
 import { Dashboard } from '@/pages/Dashboard';
 import { NotFound } from '@/pages/NotFound';
+import { PrivacyPolicy } from '@/pages/PrivacyPolicy';
+import { TermsOfService } from '@/pages/TermsOfService';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { CookieConsent } from '@/components/CookieConsent';
 import { useAuthStore } from '@/store/authStore';
 
 function App() {
@@ -22,6 +25,9 @@ function App() {
           element={token ? <Navigate to="/" replace /> : <Register />} 
         />
         
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Dashboard />} />
         </Route>
@@ -29,6 +35,7 @@ function App() {
         {/* Fallback route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <CookieConsent />
     </Router>
   );
 }
