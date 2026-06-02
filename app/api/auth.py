@@ -5,7 +5,8 @@ from sqlalchemy import select
 from pydantic import BaseModel, EmailStr
 from app.db.database import AsyncSessionLocal
 from app.db.models import User
-from app.security.auth import verify_password, create_access_token, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES
+from app.security.auth import verify_password, create_access_token, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES, create_reset_token, verify_reset_token
+from app.services.email_service import send_password_reset_email
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Authentication"])
 
@@ -66,3 +67,55 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             expires_delta=access_token_expires
         )
         return {"access_token": access_token, "token_type": "bearer"}
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+@router.post("/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest):
+    """Відправка email для скидання паролю"""
+    async with AsyncSessionLocal() as session:
+        query = select(User).where(User.email == request.email)
+        result = await session.execute(query)
+        user = result.scalar_one_or_none()
+        
+        # Ми завжди повертаємо успіх (щоб не розкривати наявність email в базі)
+        if user:
+            token = create_reset_token(user.email)
+            try:
+                await send_password_reset_email(user.email, token)
+            except Exception as e:
+                # В реальному продакшені логуємо помилку відправки листа
+                pass
+                
+        return {"message": "If this email is registered, a password reset link has been sent."}
+
+@router.post("/reset-password")
+async def reset_password(request: ResetPasswordRequest):
+    """Встановлення нового паролю за допомогою токена"""
+    email = verify_reset_token(request.token)
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token"
+        )
+        
+    async with AsyncSessionLocal() as session:
+        query = select(User).where(User.email == email)
+        result = await session.execute(query)
+        user = result.scalar_one_or_none()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+            
+        user.hashed_password = get_password_hash(request.new_password)
+        await session.commit()
+        
+        return {"message": "Password has been reset successfully"}

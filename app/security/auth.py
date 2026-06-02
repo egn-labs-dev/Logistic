@@ -36,6 +36,20 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": expire, "type": "access"})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+def create_reset_token(email: str) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(minutes=30)
+    to_encode = {"sub": email, "exp": expire, "type": "reset"}
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def verify_reset_token(token: str) -> Optional[str]:
+    try:
+        decoded_token = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if decoded_token.get("type") != "reset":
+            return None
+        return decoded_token.get("sub")
+    except jwt.PyJWTError:
+        return None
