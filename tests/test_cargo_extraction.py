@@ -48,9 +48,11 @@ async def test_complex_logistics_extraction(mock_analyze):
     # Налаштовуємо мок методу
     mock_analyze.return_value = DispatcherLLMOutput(**json.loads(MOCK_GEMINI_RESPONSE_TEXT))
 
+    import uuid
+    random_session = f"session_test_{uuid.uuid4().hex[:8]}"
     payload = {
         "organization_id": "org_logistics_test",
-        "session_id": "session_refrigerator_123",
+        "session_id": random_session,
         "text": "Потрібно завезти 3 тонни замороженої курки з Любліна до Одеси. Температура потрібна строго -18 градусів. Мій тел +380671112233"
     }
     

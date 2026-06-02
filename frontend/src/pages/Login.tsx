@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Loader2, Lock, LogIn, Truck } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Loader2, Lock, ShieldCheck, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import apiClient from '@/api/client';
 import { useAuthStore } from '@/store/authStore';
 
@@ -48,76 +46,66 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
-      <Card className="w-full max-w-md bg-slate-950/50 border-slate-800 text-slate-100 backdrop-blur-xl shadow-2xl">
-        <CardHeader className="space-y-3 pb-6">
-          <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-2 shadow-lg shadow-blue-500/20">
-            <Truck className="text-white w-6 h-6" />
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 p-8">
+        <div className="flex flex-col items-center mb-8">
+          <div className="bg-indigo-600 p-3 rounded-xl mb-4">
+            <ShieldCheck className="w-8 h-8 text-white" />
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">Zero Trust Dispatch</CardTitle>
-          <CardDescription className="text-slate-400">
-            Введіть ваші облікові дані для доступу до HITL консолі.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-300">Робочий Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="dispatcher@cargo.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-slate-900 border-slate-700 text-slate-200 placeholder:text-slate-500 focus-visible:ring-blue-500"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-slate-300">Пароль доступу</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-slate-900 border-slate-700 text-slate-200 focus-visible:ring-blue-500"
-              />
-            </div>
+          <h1 className="text-2xl font-bold text-slate-900">Zero Trust Dispatch</h1>
+          <p className="text-slate-500 mt-2 text-center">Увійдіть у систему керування вантажами</p>
+        </div>
 
-            {errorMsg && (
-              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-md flex items-start space-x-2">
-                <Lock className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
-                <p className="text-sm text-red-400 leading-tight">{errorMsg}</p>
-              </div>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-700">Робочий Email</label>
+            <Input 
+              type="email" 
+              placeholder="dispatcher@cargo.com" 
+              className="h-11" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required 
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-700">Пароль доступу</label>
+            <Input 
+              type="password" 
+              placeholder="••••••••" 
+              className="h-11" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required 
+            />
+          </div>
+
+          {errorMsg && (
+            <div className="p-3 bg-red-50 rounded-md border border-red-100 flex items-start space-x-2">
+              <Lock className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+              <p className="text-sm text-red-600 leading-tight">{errorMsg}</p>
+            </div>
+          )}
+
+          <Button type="submit" className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 mt-4 transition-colors" disabled={loading}>
+            {loading ? (
+              <><Loader2 className="animate-spin w-5 h-5 mr-2" /> Авторизація...</>
+            ) : (
+              <><LogIn className="w-5 h-5 mr-2" /> Увійти в систему</>
             )}
+          </Button>
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-md hover:shadow-blue-600/25 mt-2"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Перевірка...
-                </>
-              ) : (
-                <>
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Увійти в систему
-                </>
-              )}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex justify-center border-t border-slate-800/60 pt-4 pb-2">
-          <p className="text-xs text-slate-500 flex items-center">
-            <Lock className="w-3 h-3 mr-1" />
-            З'єднання зашифровано
-          </p>
-        </CardFooter>
-      </Card>
+          <div className="text-center pt-4 mt-2 border-t border-slate-100 text-sm text-slate-600">
+            Не маєте акаунту? <Link to="/register" className="text-indigo-600 hover:text-indigo-700 font-medium ml-1">Зареєструватися</Link>
+          </div>
+        </form>
+
+        <div className="mt-8 flex justify-center items-center gap-2 text-slate-400 text-sm">
+          <Lock className="w-4 h-4" />
+          <span>З'єднання зашифровано (AES-256)</span>
+        </div>
+      </div>
     </div>
   );
 };

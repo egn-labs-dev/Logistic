@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Loader2, Send } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import DOMPurify from 'dompurify';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useChatHistory, useSendMessage } from '@/hooks/useHistory';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -48,6 +48,7 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
               </span>
             )}
           </DialogTitle>
+          <DialogDescription className="sr-only">Історія переписки між клієнтом та ШІ/Диспетчером.</DialogDescription>
         </DialogHeader>
 
         <div className="mt-4 flex-1 overflow-hidden flex flex-col">
@@ -61,7 +62,7 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
               <p>Не вдалося завантажити історію чату.</p>
             </div>
           ) : (
-            <ScrollArea className="flex-1 pr-4 mb-4 min-h-[400px]">
+            <div className="flex-1 overflow-y-auto pr-4 mb-4 min-h-[300px] custom-scrollbar">
               <div className="flex flex-col space-y-4 pb-4">
                 {history?.length === 0 ? (
                   <div className="p-12 text-center text-slate-500 border border-dashed border-slate-800 rounded-lg">
@@ -70,7 +71,8 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
                 ) : (
                   history?.map((msg, index) => {
                     const isManual = msg.role === 'assistant' && msg.text.includes('[MANUAL_OPERATOR]');
-                    const cleanText = isManual ? msg.text.replace('[MANUAL_OPERATOR]', '') : msg.text;
+                    const rawText = isManual ? msg.text.replace('[MANUAL_OPERATOR]', '') : msg.text;
+                    const cleanText = DOMPurify.sanitize(rawText);
                     const isUser = msg.role === 'user';
                     
                     // Відповіді ШІ завжди зліва, клієнта - справа
@@ -101,7 +103,7 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
                 )}
                 <div ref={scrollRef} />
               </div>
-            </ScrollArea>
+            </div>
           )}
 
           {isHumanControlled && (

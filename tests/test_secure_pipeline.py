@@ -46,9 +46,10 @@ async def test_chat_endpoint_fail_safe_and_restoration():
     Перевіряє, що при відсутності ключа (заглушці) спрацьовує Fail-safe,
     але скруббінг та повернення структури працюють коректно.
     """
+    random_session = f"session_test_{uuid.uuid4().hex[:8]}"
     payload = {
         "organization_id": "org_test_metrics",
-        "session_id": "session_pytest_999",
+        "session_id": random_session,
         "text": "Вантаж з Києва. Мій тел +380670000000"
     }
     
@@ -58,7 +59,7 @@ async def test_chat_endpoint_fail_safe_and_restoration():
     assert response.status_code == 200
     data = response.json()
     assert "session_id" in data
-    assert data["session_id"] == "session_pytest_999"
+    assert data["session_id"] == random_session
     # Оскільки ключ Gemini пустий, має повернутися наш безпечний дефолтний текст
     assert "Вибачте, виникла технічна затримка при аналізі специфікації вантажу" in data["response_text"]
 
@@ -73,7 +74,7 @@ async def test_dispatcher_intercept_flow():
     3. Наступний запит від користувача в /chat має миттєво заблокувати ШІ.
     """
     org_id = "org_intercept_test"
-    sess_id = "session_hitl_888"
+    sess_id = f"session_hitl_{uuid.uuid4().hex[:8]}"
     mock_user_id = str(uuid.uuid4())
     
     # Створюємо валідний JWT токен для тестування (імітація успішного логіну)

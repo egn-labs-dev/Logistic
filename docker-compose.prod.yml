@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: log_admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: logistics_secure_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build: .
+    restart: always
+    depends_on: [db]
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - DATABASE_URL=postgresql+asyncpg://log_admin:${DB_PASSWORD}@db:5432/logistics_secure_db
+
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      - "80:80"
+
+volumes:
+  pgdata:
