@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
+from sqlalchemy.pool import NullPool
 
 # Беремо URL бази з середовища (за замовчуванням для docker-compose)
 DATABASE_URL = os.getenv(
@@ -10,7 +11,13 @@ DATABASE_URL = os.getenv(
     "postgresql+asyncpg://postgres:postgres@localhost:5434/logistics_db"
 )
 
-engine = create_async_engine(DATABASE_URL, echo=False)
+# Використовуємо NullPool для тестів, щоб уникнути конфліктів event loop'ів (InterfaceError)
+is_testing = os.getenv("TESTING") == "True"
+engine = create_async_engine(
+    DATABASE_URL, 
+    echo=False, 
+    poolclass=NullPool if is_testing else None
+)
 AsyncSessionLocal = sessionmaker(
     bind=engine,
     class_=AsyncSession,
