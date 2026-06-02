@@ -8,7 +8,7 @@ import { useChatHistory, useSendMessage } from '@/hooks/useHistory';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
-import { Locale } from 'date-fns';
+import type { Locale } from 'date-fns';
 
 interface ChatHistoryModalProps {
   sessionId: string | null;
