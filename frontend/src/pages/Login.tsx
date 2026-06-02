@@ -77,7 +77,14 @@ export const Login = () => {
           </div>
           
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">{t('auth.password')}</label>
+            <div className="flex justify-between items-center mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+                {t('auth.password')}
+              </label>
+              <Link to="/forgot-password" className="text-xs font-medium text-indigo-600 hover:text-indigo-500">
+                Забули пароль?
+              </Link>
+            </div>
             <Input 
               type="password" 
               placeholder="••••••••" 

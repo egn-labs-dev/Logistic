@@ -6,6 +6,8 @@ import { Dashboard } from '@/pages/Dashboard';
 import { NotFound } from '@/pages/NotFound';
 import { PrivacyPolicy } from '@/pages/PrivacyPolicy';
 import { TermsOfService } from '@/pages/TermsOfService';
+import { ForgotPassword } from '@/pages/ForgotPassword';
+import { ResetPassword } from '@/pages/ResetPassword';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { CookieConsent } from '@/components/CookieConsent';
 import { useAuthStore } from '@/store/authStore';
@@ -24,6 +26,8 @@ function App() {
           path="/register" 
           element={token ? <Navigate to="/" replace /> : <Register />} 
         />
+        <Route path="/forgot-password" element={token ? <Navigate to="/" replace /> : <ForgotPassword />} />
+        <Route path="/reset-password" element={token ? <Navigate to="/" replace /> : <ResetPassword />} />
         
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
