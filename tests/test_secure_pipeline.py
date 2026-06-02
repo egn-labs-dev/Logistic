@@ -61,7 +61,7 @@ async def test_chat_endpoint_fail_safe_and_restoration():
     assert "session_id" in data
     assert data["session_id"] == random_session
     # Оскільки ключ Gemini пустий, має повернутися наш безпечний дефолтний текст
-    assert "Вибачте, виникла технічна затримка при аналізі специфікації вантажу" in data["response_text"]
+    assert "We apologize, there was a technical delay while analyzing the cargo specification" in data["response_text"]
 
 
 # --- БЛОК 3: ТЕСТУВАННЯ HUMAN-IN-THE-LOOP (HITL) ---
@@ -113,7 +113,7 @@ async def test_dispatcher_intercept_flow():
     assert chat_res.status_code == 200
     chat_data = chat_res.json()
     # Система повинна віддати системний HITL-варнінг замість звернення до ШІ
-    assert "[SYSTEM: ШІ вимкнено" in chat_data["response_text"]
+    assert "[SYSTEM: AI disabled" in chat_data["response_text"]
 
     # Крок 3: Перевірка захисту (спроба перехоплення БЕЗ токена)
     async with AsyncClient(app=app, base_url="http://test") as ac:
