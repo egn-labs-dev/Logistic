@@ -8,8 +8,8 @@ class DataScrubber:
         vault = {}
         modified_text = text
         
-        # Спрощений приклад регулярних виразів для MVP
-        # Телефонні номери (базовий паттерн)
+        # Simplified regex patterns for MVP
+        # Phone numbers (basic pattern)
         phone_pattern = r"\+?\d{10,13}"
         phones = set(re.findall(phone_pattern, text))
         
@@ -18,7 +18,7 @@ class DataScrubber:
             vault[placeholder] = phone
             modified_text = modified_text.replace(phone, placeholder)
             
-        # Email адреси (базовий паттерн)
+        # Email addresses (basic pattern)
         email_pattern = r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+"
         emails = set(re.findall(email_pattern, modified_text))
         

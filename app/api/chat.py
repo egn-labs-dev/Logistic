@@ -16,35 +16,35 @@ gemini_service = GeminiDispatcherService()
 @limiter.limit("5/minute")
 async def process_secure_message(request: Request, payload: IncomingMessage):
     try:
-        # Перевірка на перехоплення людиною перед будь-якими іншими діями
+        # Check for human interception before any other actions
         async with get_db_session_with_rls(payload.organization_id) as session:
             query = select(CargoOrder).where(CargoOrder.session_id == payload.session_id).order_by(CargoOrder.created_at.desc()).limit(1)
             result = await session.execute(query)
             existing_order = result.scalar_one_or_none()
             
-            # ЯКЩО ЧАТ ПЕРЕХОПИЛА ЛЮДИНА — повністю блокуємо ШІ
+            # IF HUMAN INTERCEPTED - completely block AI
             if existing_order and existing_order.status == "human_controlled":
                 return ChatResponse(
                     session_id=payload.session_id,
-                    response_text="[SYSTEM: ШІ вимкнено. Ваш діалог переведено на живого оператора. Очікуйте відповіді...]"
+                    response_text="[SYSTEM: AI disabled. Your dialogue has been transferred to a live operator. Please wait for a response...]"
                 )
 
-        # Крок 1: Локальний Data Scrubbing (Вхідний бар'єр безпеки)
+        # Step 1: Local Data Scrubbing (Security barrier entry)
         scrubbed = DataScrubber.anonymize(payload.text)
         
-        # Крок 2: Передача очищеного тексту в Gemini
+        # Step 2: Pass scrubbed text to Gemini
         llm_output = await gemini_service.analyze_dispatched_text(scrubbed.clean_text)
         
-        # Крок 3: Асинхронний запис у базу даних під захистом RLS
+        # Step 3: Asynchronous database writing protected by RLS
         async with get_db_session_with_rls(payload.organization_id) as session:
             
-            # Визначаємо фінальний статус на основі вердикту Gemini
+            # Determine final status based on Gemini's verdict
             if llm_output.requires_human_intervention:
                 order_status = "human_required"
             else:
                 order_status = "qualified_lead" if llm_output.is_qualified_lead else "active_chat"
             
-            # Зберігаємо структуровані дані у CargoOrder
+            # Save structured data to CargoOrder
             new_order = CargoOrder(
                 organization_id=payload.organization_id,
                 session_id=payload.session_id,
@@ -53,7 +53,7 @@ async def process_secure_message(request: Request, payload: IncomingMessage):
             )
             session.add(new_order)
             
-            # Фіксуємо Immutable Audit Trail
+            # Record Immutable Audit Trail
             audit_entry = ImmutableAuditLog(
                 organization_id=payload.organization_id,
                 session_id=payload.session_id,
@@ -63,7 +63,7 @@ async def process_secure_message(request: Request, payload: IncomingMessage):
             )
             session.add(audit_entry)
 
-        # Крок 4: Деанонімізація згенерованої відповіді перед відправкою клієнту
+        # Step 4: Deanonymize generated response before sending it to the client
         final_response_text = DataScrubber.deanonymize(llm_output.response_to_user, scrubbed.vault)
         
         return ChatResponse(

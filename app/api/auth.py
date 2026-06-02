@@ -17,9 +17,9 @@ class UserCreate(BaseModel):
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register_user(user_data: UserCreate):
-    """Реєстрація нового диспетчера та створення/приєднання до організації"""
+    """Register a new dispatcher and create/join an organization"""
     async with AsyncSessionLocal() as session:
-        # Перевірка чи існує такий email
+        # Check if email already exists
         query = select(User).where(User.email == user_data.email)
         result = await session.execute(query)
         if result.scalar_one_or_none():
@@ -28,7 +28,7 @@ async def register_user(user_data: UserCreate):
                 detail="Email already registered"
             )
         
-        # Створення нового користувача
+        # Create a new user
         new_user = User(
             email=user_data.email,
             hashed_password=get_password_hash(user_data.password),
@@ -42,8 +42,8 @@ async def register_user(user_data: UserCreate):
 
 @router.post("/login")
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    """Отримання JWT токена за email та паролем"""
-    # Для автентифікації ми відкриваємо звичайну сесію (без RLS), бо користувач ще не авторизований
+    """Obtain JWT token via email and password"""
+    # For authentication we open a standard session (without RLS) because the user is not yet authorized
     async with AsyncSessionLocal() as session:
         query = select(User).where(User.email == form_data.username)
         result = await session.execute(query)
@@ -61,7 +61,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         
-        # Зашиваємо у токен критичні дані: ID, роль та організацію (для RLS)
+        # Embed critical data into the token: ID, role, and organization (for RLS)
         access_token = create_access_token(
             data={"sub": str(user.id), "role": user.role, "org_id": user.organization_id},
             expires_delta=access_token_expires
@@ -77,26 +77,26 @@ class ResetPasswordRequest(BaseModel):
 
 @router.post("/forgot-password")
 async def forgot_password(request: ForgotPasswordRequest):
-    """Відправка email для скидання паролю"""
+    """Send an email for password reset"""
     async with AsyncSessionLocal() as session:
         query = select(User).where(User.email == request.email)
         result = await session.execute(query)
         user = result.scalar_one_or_none()
         
-        # Ми завжди повертаємо успіх (щоб не розкривати наявність email в базі)
+        # We always return success (to avoid exposing email existence in the database)
         if user:
             token = create_reset_token(user.email)
             try:
                 await send_password_reset_email(user.email, token)
             except Exception as e:
-                # В реальному продакшені логуємо помилку відправки листа
+                # In a real production environment, log the email sending error
                 pass
                 
         return {"message": "If this email is registered, a password reset link has been sent."}
 
 @router.post("/reset-password")
 async def reset_password(request: ResetPasswordRequest):
-    """Встановлення нового паролю за допомогою токена"""
+    """Set a new password using a token"""
     email = verify_reset_token(request.token)
     if not email:
         raise HTTPException(

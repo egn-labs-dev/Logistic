@@ -5,13 +5,13 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 from sqlalchemy.pool import NullPool
 
-# Беремо URL бази з середовища (за замовчуванням для docker-compose)
+# Get Database URL from environment (default is for docker-compose)
 DATABASE_URL = os.getenv(
     "DATABASE_URL", 
     "postgresql+asyncpg://postgres:postgres@localhost:5434/logistics_db"
 )
 
-# Використовуємо NullPool для тестів, щоб уникнути конфліктів event loop'ів (InterfaceError)
+# Use NullPool for tests to avoid event loop conflicts (InterfaceError)
 is_testing = os.getenv("TESTING") == "True"
 engine = create_async_engine(
     DATABASE_URL, 
@@ -27,12 +27,12 @@ AsyncSessionLocal = sessionmaker(
 @asynccontextmanager
 async def get_db_session_with_rls(organization_id: str):
     """
-    Генерує сесію бази даних з увімкненим RLS (Row Level Security).
-    Гарантує ізоляцію клієнтів на рівні ядра PostgreSQL.
+    Generates a database session with Row Level Security (RLS) enabled.
+    Ensures client isolation at the PostgreSQL core level.
     """
     async with AsyncSessionLocal() as session:
         try:
-            # Важливий крок: встановлюємо локальну змінну для транзакції
+            # Critical step: set local variable for the transaction
             await session.execute(
                 text("SELECT set_config('app.current_organization_id', :org_id, true)"),
                 {"org_id": organization_id}

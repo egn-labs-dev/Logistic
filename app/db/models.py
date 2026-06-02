@@ -11,7 +11,7 @@ class CargoOrder(Base):
     id = Column(String, primary_key=True, default=lambda: os.urandom(16).hex())
     organization_id = Column(String, index=True, nullable=False)
     session_id = Column(String, index=True, nullable=False)
-    cargo_details = Column(JSON, nullable=False)  # JSON-представлення витягнутих даних
+    cargo_details = Column(JSON, nullable=False)  # JSON representation of extracted data
     status = Column(String, nullable=False, default="new")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -21,9 +21,9 @@ class ImmutableAuditLog(Base):
     id = Column(String, primary_key=True, default=lambda: os.urandom(16).hex())
     organization_id = Column(String, index=True, nullable=False)
     session_id = Column(String, index=True, nullable=False)
-    clean_prompt = Column(Text, nullable=False)  # Анонімізований текст
-    clean_response = Column(Text, nullable=False) # Відповідь моделі з токенами
-    vault_snapshot = Column(JSON, nullable=False) # Сховище для підстановки
+    clean_prompt = Column(Text, nullable=False)  # Anonymized text
+    clean_response = Column(Text, nullable=False) # Model response with tokens
+    vault_snapshot = Column(JSON, nullable=False) # Vault storage for de-anonymization
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
 import uuid
@@ -33,7 +33,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 class User(Base):
     """
-    Модель співробітника логістичної компанії (Диспетчер, Адмін).
+    Model for logistics company employee (Dispatcher, Admin).
     """
     __tablename__ = "users"
 

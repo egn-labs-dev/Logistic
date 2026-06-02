@@ -23,7 +23,7 @@ logger.addHandler(logHandler)
 # Environment Validation
 if not os.getenv("GEMINI_API_KEY") or not os.getenv("DATABASE_URL"):
     logging.critical("Critical Error: Configuration Missing (GEMINI_API_KEY or DATABASE_URL not set)")
-    # Для MVP, якщо ми хочемо щоб тести та локальний запуск працював без падіння:
+    # For MVP, if we want tests and local run to work without crashing:
     if os.getenv("TESTING") != "True" and not os.getenv("BYPASS_ENV_CHECK"):
         sys.exit(1)
 
@@ -59,8 +59,8 @@ app.include_router(dispatcher_router)
 @app.on_event("startup")
 async def startup_event():
     logging.info("Zero Trust Logistics API starting up...")
-    # Таблиці БД тепер створюються та мігруються через Alembic
-    # Не використовуємо Base.metadata.create_all у продакшені!
+    # DB tables are now created and migrated via Alembic
+    # Do not use Base.metadata.create_all in production!
 
 @app.get("/health")
 async def health_check():

@@ -2,9 +2,9 @@ from typing import Dict
 from pydantic import BaseModel, Field
 
 class IncomingMessage(BaseModel):
-    organization_id: str = Field(..., description="Унікальний ID компанії-клієнта для RLS")
-    session_id: str = Field(..., description="ID сесії діалогу")
-    text: str = Field(..., min_length=1, max_length=2000, description="Текст запиту від клієнта")
+    organization_id: str = Field(..., description="Unique client company ID for RLS")
+    session_id: str = Field(..., description="Dialogue session ID")
+    text: str = Field(..., min_length=1, max_length=2000, description="Client request text")
 
 class ScrubbedContext(BaseModel):
     original_text: str

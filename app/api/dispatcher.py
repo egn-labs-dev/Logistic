@@ -9,7 +9,7 @@ from app.security.scrubber import DataScrubber
 
 router = APIRouter(prefix="/api/v1/dispatcher", tags=["Dispatcher Console (HITL)"])
 
-# --- БЛОК ЗАЛЕЖНОСТЕЙ БЕЗПЕКИ ---
+# --- SECURITY DEPENDENCIES BLOCK ---
 async def get_current_user_token_data(token: str = Depends(oauth2_scheme)) -> TokenData:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -32,15 +32,15 @@ async def require_dispatcher_role(token_data: TokenData = Depends(get_current_us
         raise HTTPException(status_code=403, detail="Not enough permissions")
     return token_data
 
-# --- ОНОВЛЕНІ ЗАХИЩЕНІ ЕНДПОІНТИ ---
+# --- UPDATED SECURE ENDPOINTS ---
 
 class InterceptPayload(BaseModel):
     session_id: str
-    # organization_id більше не передається в тілі запиту! Вона береться безпечно з токена.
+    # organization_id is no longer passed in the request body! It is securely extracted from the token.
 
 @router.get("/alerts", status_code=status.HTTP_200_OK)
 async def get_alerts_for_human(current_user: TokenData = Depends(require_dispatcher_role)):
-    """Повертає список замовлень для диспетчера. Дані ізолюються по організації з токена."""
+    """Returns a list of orders for the dispatcher. Data is isolated by the organization from the token."""
     async with get_db_session_with_rls(current_user.organization_id) as session:
         query = select(CargoOrder).where(CargoOrder.status.in_(["human_required", "human_controlled"]))
         result = await session.execute(query)
@@ -49,7 +49,7 @@ async def get_alerts_for_human(current_user: TokenData = Depends(require_dispatc
 
 @router.post("/intercept", status_code=status.HTTP_200_OK)
 async def intercept_chat(payload: InterceptPayload, current_user: TokenData = Depends(require_dispatcher_role)):
-    """Оператор перехоплює чат. RLS гарантує, що він не перехопить чужий чат."""
+    """The operator intercepts the chat. RLS ensures they cannot intercept a chat from another organization."""
     async with get_db_session_with_rls(current_user.organization_id) as session:
         query = (
             update(CargoOrder)
@@ -62,7 +62,7 @@ async def intercept_chat(payload: InterceptPayload, current_user: TokenData = De
 @router.get("/history/{session_id}", status_code=status.HTTP_200_OK)
 async def get_chat_history(session_id: str, current_user: TokenData = Depends(require_dispatcher_role)):
     """
-    Повертає історію переписки для конкретної сесії з де-анонімізацією на льоту.
+    Returns the chat history for a specific session with on-the-fly de-anonymization.
     """
     async with get_db_session_with_rls(current_user.organization_id) as session:
         query = select(ImmutableAuditLog).where(
@@ -74,7 +74,7 @@ async def get_chat_history(session_id: str, current_user: TokenData = Depends(re
         
         history = []
         for log in logs:
-            # Де-анонімізуємо на льоту для відображення реальних даних диспетчеру
+            # De-anonymize on the fly to display real data to the dispatcher
             clean_prompt = DataScrubber.deanonymize(log.clean_prompt, log.vault_snapshot)
             clean_response = DataScrubber.deanonymize(log.clean_response, log.vault_snapshot)
             
@@ -90,20 +90,20 @@ class ManualMessage(BaseModel):
 @router.post("/send", status_code=status.HTTP_200_OK)
 async def send_manual_message(msg: ManualMessage, current_user: TokenData = Depends(require_dispatcher_role)):
     async with get_db_session_with_rls(current_user.organization_id) as session:
-        # 1. Перевіряємо, чи чат дійсно перехоплений
+        # 1. Check if the chat is actually intercepted
         query = select(CargoOrder).where(CargoOrder.session_id == msg.session_id).limit(1)
         order = (await session.execute(query)).scalar_one_or_none()
         
         if order and order.status != "human_controlled":
              raise HTTPException(status_code=400, detail="Chat is not in human-controlled mode")
         
-        # 2. Логуємо повідомлення диспетчера в Audit Log (як відповідь)
+        # 2. Log the dispatcher's message in the Audit Log (as a response)
         audit_entry = ImmutableAuditLog(
             organization_id=current_user.organization_id,
             session_id=msg.session_id,
             clean_prompt="[MANUAL_OPERATOR]",
             clean_response=msg.message,
-            vault_snapshot={} # Для повідомлень оператора не потрібно маскування
+            vault_snapshot={} # No masking required for operator messages
         )
         session.add(audit_entry)
         
