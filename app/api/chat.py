@@ -1,10 +1,11 @@
 import json
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Request
 from app.schemas.chat import IncomingMessage, ChatResponse
 from app.security.scrubber import DataScrubber
 from app.services.gemini_service import GeminiDispatcherService
 from app.db.database import get_db_session_with_rls
 from app.db.models import CargoOrder, ImmutableAuditLog
+from app.security.rate_limiter import limiter
 
 from sqlalchemy import select
 
@@ -12,7 +13,8 @@ router = APIRouter(prefix="/api/v1", tags=["Secure Chat Engine"])
 gemini_service = GeminiDispatcherService()
 
 @router.post("/chat", response_model=ChatResponse, status_code=status.HTTP_200_OK)
-async def process_secure_message(payload: IncomingMessage):
+@limiter.limit("5/minute")
+async def process_secure_message(request: Request, payload: IncomingMessage):
     try:
         # Перевірка на перехоплення людиною перед будь-якими іншими діями
         async with get_db_session_with_rls(payload.organization_id) as session:
