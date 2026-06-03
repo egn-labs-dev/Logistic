@@ -1,11 +1,12 @@
 import json
-from fastapi import APIRouter, HTTPException, status, Request
+from fastapi import APIRouter, HTTPException, status, Request, Depends
 from app.schemas.chat import IncomingMessage, ChatResponse
 from app.security.scrubber import DataScrubber
 from app.services.gemini_service import GeminiDispatcherService
 from app.db.database import get_db_session_with_rls
 from app.db.models import CargoOrder, ImmutableAuditLog
 from app.security.rate_limiter import limiter
+from app.security.auth import get_current_user_token_data, TokenData
 
 from sqlalchemy import select
 
@@ -14,10 +15,14 @@ gemini_service = GeminiDispatcherService()
 
 @router.post("/chat", response_model=ChatResponse, status_code=status.HTTP_200_OK)
 @limiter.limit("5/minute")
-async def process_secure_message(request: Request, payload: IncomingMessage):
+async def process_secure_message(
+    request: Request,
+    payload: IncomingMessage,
+    current_user: TokenData = Depends(get_current_user_token_data)
+):
     try:
         # Check for human interception before any other actions
-        async with get_db_session_with_rls(payload.organization_id) as session:
+        async with get_db_session_with_rls(current_user.organization_id) as session:
             query = select(CargoOrder).where(CargoOrder.session_id == payload.session_id).order_by(CargoOrder.created_at.desc()).limit(1)
             result = await session.execute(query)
             existing_order = result.scalar_one_or_none()
@@ -36,7 +41,7 @@ async def process_secure_message(request: Request, payload: IncomingMessage):
         llm_output = await gemini_service.analyze_dispatched_text(scrubbed.clean_text)
         
         # Step 3: Asynchronous database writing protected by RLS
-        async with get_db_session_with_rls(payload.organization_id) as session:
+        async with get_db_session_with_rls(current_user.organization_id) as session:
             
             # Determine final status based on Gemini's verdict
             if llm_output.requires_human_intervention:
@@ -46,7 +51,7 @@ async def process_secure_message(request: Request, payload: IncomingMessage):
             
             # Save structured data to CargoOrder
             new_order = CargoOrder(
-                organization_id=payload.organization_id,
+                organization_id=current_user.organization_id,
                 session_id=payload.session_id,
                 cargo_details=json.loads(llm_output.extracted_data.model_dump_json()),
                 status=order_status
@@ -55,7 +60,7 @@ async def process_secure_message(request: Request, payload: IncomingMessage):
             
             # Record Immutable Audit Trail
             audit_entry = ImmutableAuditLog(
-                organization_id=payload.organization_id,
+                organization_id=current_user.organization_id,
                 session_id=payload.session_id,
                 clean_prompt=scrubbed.clean_text,
                 clean_response=llm_output.response_to_user,

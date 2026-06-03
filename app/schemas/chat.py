@@ -2,7 +2,6 @@ from typing import Dict
 from pydantic import BaseModel, Field
 
 class IncomingMessage(BaseModel):
-    organization_id: str = Field(..., description="Unique client company ID for RLS")
     session_id: str = Field(..., description="Dialogue session ID")
     text: str = Field(..., min_length=1, max_length=2000, description="Client request text")
 

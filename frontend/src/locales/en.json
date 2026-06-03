@@ -61,7 +61,24 @@
     "register_btn": "Register",
     "registering": "Registering...",
     "has_account": "Already have an account?",
-    "login": "Sign In"
+    "login": "Sign In",
+    "forgot_password": "Forgot Password?",
+    "forgot_password_title": "Password Recovery",
+    "check_inbox": "Check your inbox",
+    "back_to_login": "Back to login",
+    "send_link": "Send reset link",
+    "error_generic": "Failed to send request. Please try again later.",
+    "reset_password_title": "Create New Password",
+    "reset_password_desc": "Enter a new secure password for your account.",
+    "new_password": "New Password",
+    "confirm_password": "Confirm Password",
+    "save_password": "Save Password",
+    "invalid_token_title": "Invalid Request",
+    "invalid_token_desc": "Security token is missing.",
+    "restore_password": "Restore Password",
+    "cancel": "Cancel",
+    "passwords_dont_match": "Passwords don't match",
+    "link_expired": "Link is invalid or expired. Please request a new one."
   },
   "chat": {
     "history": "Chat History",
@@ -70,5 +87,12 @@
     "type_message": "Type a message to the client...",
     "error_loading": "Error loading chat history",
     "sending": "Sending..."
+  },
+  "cookie": {
+    "title": "We use cookies",
+    "description": "This website uses cookies for authentication, localization settings and traffic analysis in accordance with GDPR.",
+    "privacy_link": "Privacy Policy",
+    "accept": "Accept",
+    "close": "Close"
   }
 }

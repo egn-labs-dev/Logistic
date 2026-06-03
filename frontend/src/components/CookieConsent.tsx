@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Cookie, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 export const CookieConsent = () => {
+  const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -18,6 +20,10 @@ export const CookieConsent = () => {
     setIsVisible(false);
   };
 
+  const handleDecline = () => {
+    setIsVisible(false);
+  };
+
   if (!isVisible) return null;
 
   return (
@@ -28,26 +34,19 @@ export const CookieConsent = () => {
             <Cookie className="w-6 h-6 text-indigo-400" />
           </div>
           <div>
-            <h3 className="text-white font-semibold mb-1">Ми використовуємо cookies</h3>
+            <h3 className="text-white font-semibold mb-1">{t('cookie.title', 'Ми використовуємо файли cookie')}</h3>
             <p className="text-slate-400 text-sm leading-relaxed">
-              Цей веб-сайт використовує файли cookie для забезпечення функціонування системи авторизації, збереження налаштувань локалізації та аналізу трафіку відповідно до GDPR. 
-              Детальніше у нашій <Link to="/privacy" className="text-indigo-400 hover:underline">Політиці Конфіденційності</Link>.
+              {t('cookie.description', 'Цей сайт використовує необхідні файли cookie для безпечного керування сесіями. Ми не використовуємо рекламні трекери.')} <Link to="/privacy" className="text-indigo-400 hover:underline">{t('cookie.privacy_link')}</Link>.
             </p>
           </div>
         </div>
         <div className="flex gap-3 w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
+          <Button variant="outline" size="sm" onClick={handleDecline}>
+            {t('cookie.close', 'Закрити')}
+          </Button>
           <Button 
             onClick={handleAccept} 
             className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white"
-          >
-            Прийняти
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => setIsVisible(false)} 
-            className="text-slate-400 hover:text-white"
-            aria-label="Закрити"
           >
             <X className="w-5 h-5" />
           </Button>

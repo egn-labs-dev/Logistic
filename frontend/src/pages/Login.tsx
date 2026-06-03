@@ -40,9 +40,9 @@ export const Login = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.response?.status === 401 || error.response?.status === 400) {
-        setErrorMsg('Невірні дані або доступ до системи призупинено.');
+        setErrorMsg(t('auth.error_login'));
       } else {
-        setErrorMsg('Виникла помилка при з\'єднанні з сервером. Спробуйте пізніше.');
+        setErrorMsg(t('auth.error_server'));
       }
     } finally {
       setLoading(false);
@@ -82,7 +82,7 @@ export const Login = () => {
                 {t('auth.password')}
               </label>
               <Link to="/forgot-password" className="text-xs font-medium text-indigo-600 hover:text-indigo-500">
-                Забули пароль?
+                {t('auth.forgot_password', 'Забули пароль?')}
               </Link>
             </div>
             <Input 
@@ -117,7 +117,7 @@ export const Login = () => {
 
         <div className="mt-8 flex justify-center items-center gap-2 text-slate-400 text-sm">
           <Lock className="w-4 h-4" />
-          <span>З'єднання зашифровано (AES-256)</span>
+          <span>{t('auth.encryption_notice', "З'єднання зашифровано (AES-256)")}</span>
         </div>
       </div>
     </div>

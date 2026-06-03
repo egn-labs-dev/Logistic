@@ -4,33 +4,10 @@ from pydantic import BaseModel
 from sqlalchemy import select, update
 from app.db.database import get_db_session_with_rls
 from app.db.models import CargoOrder, ImmutableAuditLog
-from app.security.auth import SECRET_KEY, ALGORITHM, oauth2_scheme, TokenData
+from app.security.auth import SECRET_KEY, ALGORITHM, oauth2_scheme, TokenData, get_current_user_token_data, require_dispatcher_role
 from app.security.scrubber import DataScrubber
 
 router = APIRouter(prefix="/api/v1/dispatcher", tags=["Dispatcher Console (HITL)"])
-
-# --- SECURITY DEPENDENCIES BLOCK ---
-async def get_current_user_token_data(token: str = Depends(oauth2_scheme)) -> TokenData:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("sub")
-        role: str = payload.get("role")
-        org_id: str = payload.get("org_id")
-        if user_id is None or org_id is None:
-            raise credentials_exception
-        return TokenData(user_id=user_id, role=role, organization_id=org_id)
-    except jwt.PyJWTError:
-        raise credentials_exception
-
-async def require_dispatcher_role(token_data: TokenData = Depends(get_current_user_token_data)) -> TokenData:
-    if token_data.role not in ["dispatcher", "admin"]:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-    return token_data
 
 # --- UPDATED SECURE ENDPOINTS ---
 
@@ -138,14 +115,30 @@ async def get_analytics_stats(current_user: TokenData = Depends(require_dispatch
         
         chart_data_map = defaultdict(lambda: {"autonomous": 0, "manual": 0})
         
+        hitl_response_times = []
+        incident_start_times = {}
+
         for log in logs:
             if not log.timestamp:
                 continue
             day_str = log.timestamp.strftime("%m-%d")
             if "[MANUAL_OPERATOR]" in log.clean_prompt:
                 chart_data_map[day_str]["manual"] += 1
+                if log.session_id in incident_start_times:
+                    start_time = incident_start_times.pop(log.session_id)
+                    diff = (log.timestamp - start_time).total_seconds()
+                    hitl_response_times.append(diff)
             else:
                 chart_data_map[day_str]["autonomous"] += 1
+                if log.session_id not in incident_start_times:
+                    incident_start_times[log.session_id] = log.timestamp
+                    
+        avg_response_str = "N/A"
+        if hitl_response_times:
+            avg_secs = sum(hitl_response_times) / len(hitl_response_times)
+            avg_mins = int(avg_secs // 60)
+            avg_rem_secs = int(avg_secs % 60)
+            avg_response_str = f"{avg_mins}m {avg_rem_secs}s"
                 
         # Format for Recharts
         chart_data = []
@@ -156,20 +149,9 @@ async def get_analytics_stats(current_user: TokenData = Depends(require_dispatch
                 "manual": counts["manual"]
             })
             
-        # If no data, provide some mock data for the visual effect so the dashboard isn't empty on day 1
-        if not chart_data:
-            today = datetime.utcnow()
-            for i in range(6, -1, -1):
-                d = today - timedelta(days=i)
-                chart_data.append({
-                    "day": d.strftime("%m-%d"),
-                    "autonomous": 12 + (i % 3) * 4,
-                    "manual": 2 if i % 2 == 0 else 0
-                })
-                
         return {
             "autonomy_rate": round(autonomy_rate, 1),
-            "hitl_response_time": "1m 24s", # Mock for MVP
+            "hitl_response_time": avg_response_str,
             "active_incidents": active_incidents,
             "cost_savings_hours": round(cost_savings_hours, 1),
             "chart_data": chart_data

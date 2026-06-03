@@ -17,7 +17,7 @@
       "attention": "Uwaga",
       "needs_intervention": "Wymaga interwencji",
       "savings": "Oszczędności (Godziny)",
-      "saved_by_ai": "Zaoczęndzone dzięki AI"
+      "saved_by_ai": "Zaoszczędzone dzięki AI"
     },
     "chart": {
       "title": "Wydajność Systemu",
@@ -61,7 +61,24 @@
     "register_btn": "Zarejestruj się",
     "registering": "Rejestracja...",
     "has_account": "Masz już konto?",
-    "login": "Zaloguj się"
+    "login": "Zaloguj się",
+    "forgot_password": "Zapomniałeś hasła?",
+    "forgot_password_title": "Odzyskiwanie hasła",
+    "check_inbox": "Sprawdź skrzynkę pocztową",
+    "back_to_login": "Powrót do logowania",
+    "send_link": "Wyślij link resetujący",
+    "error_generic": "Nie udało się wysłać żądania. Spróbuj ponownie później.",
+    "reset_password_title": "Utwórz nowe hasło",
+    "reset_password_desc": "Wprowadź nowe bezpieczne hasło dla swojego konta.",
+    "new_password": "Nowe hasło",
+    "confirm_password": "Potwierdź hasło",
+    "save_password": "Zapisz hasło",
+    "invalid_token_title": "Nieprawidłowe żądanie",
+    "invalid_token_desc": "Brak tokenu bezpieczeństwa.",
+    "restore_password": "Odzyskaj hasło",
+    "cancel": "Anuluj",
+    "passwords_dont_match": "Hasła nie pasują do siebie",
+    "link_expired": "Link jest nieprawidłowy lub wygasł. Złóż nowe żądanie."
   },
   "chat": {
     "history": "Historia Czatu",
@@ -70,5 +87,12 @@
     "type_message": "Napisz wiadomość do klienta...",
     "error_loading": "Błąd ładowania historii czatu",
     "sending": "Wysyłanie..."
+  },
+  "cookie": {
+    "title": "Używamy ciasteczek",
+    "description": "Ta strona używa plików cookie do uwierzytelniania, ustawień lokalizacji i analizy ruchu zgodnie z RODO.",
+    "privacy_link": "Polityka Prywatności",
+    "accept": "Akceptuj",
+    "close": "Zamknij"
   }
 }

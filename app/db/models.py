@@ -1,14 +1,15 @@
-import os
+import uuid
 import json
-from sqlalchemy import Column, String, Text, DateTime, JSON, func
-from sqlalchemy.orm import declarative_base
+from datetime import datetime
+from sqlalchemy import Column, String, Text, DateTime, JSON, func, UUID, Boolean
+from sqlalchemy.orm import declarative_base, Mapped, mapped_column
 
 Base = declarative_base()
 
 class CargoOrder(Base):
     __tablename__ = "cargo_orders"
 
-    id = Column(String, primary_key=True, default=lambda: os.urandom(16).hex())
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     organization_id = Column(String, index=True, nullable=False)
     session_id = Column(String, index=True, nullable=False)
     cargo_details = Column(JSON, nullable=False)  # JSON representation of extracted data
@@ -18,18 +19,13 @@ class CargoOrder(Base):
 class ImmutableAuditLog(Base):
     __tablename__ = "audit_logs"
     
-    id = Column(String, primary_key=True, default=lambda: os.urandom(16).hex())
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     organization_id = Column(String, index=True, nullable=False)
     session_id = Column(String, index=True, nullable=False)
     clean_prompt = Column(Text, nullable=False)  # Anonymized text
     clean_response = Column(Text, nullable=False) # Model response with tokens
     vault_snapshot = Column(JSON, nullable=False) # Vault storage for de-anonymization
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
-
-import uuid
-from datetime import datetime
-from sqlalchemy import Boolean, UUID
-from sqlalchemy.orm import Mapped, mapped_column
 
 class User(Base):
     """

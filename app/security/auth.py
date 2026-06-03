@@ -3,11 +3,18 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 import jwt
 import bcrypt
+from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
+import logging
 
 # Налаштування безпеки (в продакшені SECRET_KEY береться з .env)
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "SUPER_SECRET_ENTERPRISE_KEY_FOR_JWT_2026")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "")
+if not SECRET_KEY and os.getenv("TESTING") != "True":
+    logging.critical("FATAL: JWT_SECRET_KEY is not set!")
+    import sys
+    sys.exit(1)
+    
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 120  # Диспетчери часто працюють позмінно
 
@@ -19,6 +26,28 @@ class TokenData(BaseModel):
     user_id: Optional[str] = None
     role: Optional[str] = None
     organization_id: Optional[str] = None
+
+async def get_current_user_token_data(token: str = Depends(oauth2_scheme)) -> TokenData:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        role: str = payload.get("role")
+        org_id: str = payload.get("org_id")
+        if user_id is None or org_id is None:
+            raise credentials_exception
+        return TokenData(user_id=user_id, role=role, organization_id=org_id)
+    except jwt.PyJWTError:
+        raise credentials_exception
+
+async def require_dispatcher_role(token_data: TokenData = Depends(get_current_user_token_data)) -> TokenData:
+    if token_data.role not in ["dispatcher", "admin"]:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    return token_data
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:

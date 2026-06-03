@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle2, Loader2, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import apiClient from '@/api/client';
 import { useTranslation } from 'react-i18next';
 
 export const ForgotPassword = () => {
@@ -17,19 +18,10 @@ export const ForgotPassword = () => {
     setErrorMsg('');
     
     try {
-      const response = await fetch('http://localhost:8000/api/v1/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to request reset');
-      }
-      
+      await apiClient.post('/auth/forgot-password', { email });
       setSuccess(true);
     } catch (err: any) {
-      setErrorMsg('Помилка при відправці запиту. Спробуйте пізніше.');
+      setErrorMsg(t('auth.error_generic', 'Помилка при відправці запиту. Спробуйте пізніше.'));
     } finally {
       setLoading(false);
     }
@@ -42,19 +34,19 @@ export const ForgotPassword = () => {
           <div className="mx-auto w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
             <Mail className="w-6 h-6 text-indigo-600" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">Відновлення паролю</h1>
-          <p className="text-slate-500 text-sm">Введіть email, пов'язаний з вашим акаунтом, і ми надішлемо інструкції.</p>
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">{t('auth.forgot_password_title')}</h1>
+          <p className="text-slate-500 text-sm">{t('auth.forgot_password_desc')}</p>
         </div>
 
         {success ? (
           <div className="text-center">
             <div className="bg-green-50 text-green-700 p-4 rounded-xl mb-6 flex flex-col items-center">
               <CheckCircle2 className="w-10 h-10 mb-2" />
-              <p className="font-medium">Лист відправлено!</p>
-              <p className="text-sm mt-1">Перевірте поштову скриньку <strong>{email}</strong>.</p>
+              <p className="font-medium">{t('auth.email_sent')}</p>
+              <p className="text-sm mt-1">{t('auth.check_inbox')} <strong>{email}</strong>.</p>
             </div>
             <Button asChild variant="outline" className="w-full">
-              <Link to="/login"><ArrowLeft className="w-4 h-4 mr-2" /> Повернутися до входу</Link>
+              <Link to="/login"><ArrowLeft className="w-4 h-4 mr-2" /> {t('auth.back_to_login')}</Link>
             </Button>
           </div>
         ) : (
@@ -81,12 +73,12 @@ export const ForgotPassword = () => {
             )}
 
             <Button type="submit" className="w-full h-11 bg-indigo-600 hover:bg-indigo-700" disabled={loading}>
-              {loading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Відправити посилання'}
+              {loading ? <Loader2 className="animate-spin w-5 h-5" /> : t('auth.send_link')}
             </Button>
             
             <div className="text-center pt-4">
               <Link to="/login" className="text-sm text-slate-500 hover:text-indigo-600 font-medium inline-flex items-center">
-                <ArrowLeft className="w-4 h-4 mr-1" /> Повернутися до входу
+                <ArrowLeft className="w-4 h-4 mr-1" /> {t('auth.back_to_login')}
               </Link>
             </div>
           </form>
