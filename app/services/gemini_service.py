@@ -55,11 +55,22 @@ class GeminiDispatcherService:
             return DispatcherLLMOutput(**data_dict)
         except Exception as e:
             import logging
+            from app.schemas.dispatcher import CargoDimensions, BodyType, TemperatureRegime, ADRDetails
             logging.error(f"Gemini Service Error: {e}")
             # Our robust Fail-safe contour
             return DispatcherLLMOutput(
                 is_qualified_lead=False,
                 requires_human_intervention=True,
-                extracted_data=ExtractedCargoDetails(detected_placeholders=[]),
+                extracted_data=ExtractedCargoDetails(
+                    departure_city="",
+                    destination_city="",
+                    cargo_type="",
+                    weight_tons=0.0,
+                    dimensions=CargoDimensions(length_m=0.0, width_m=0.0, height_m=0.0, volume_m3=0.0),
+                    body_type_required=BodyType.NOT_SPECIFIED,
+                    temperature_control=TemperatureRegime(is_required=False, min_celsius=0.0, max_celsius=0.0),
+                    adr_specification=ADRDetails(is_dangerous=False, adr_class=""),
+                    detected_placeholders=[]
+                ),
                 response_to_user="We apologize, there was a technical delay while analyzing the cargo specification. Transferring the dialogue to an operator."
             )
