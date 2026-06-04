@@ -44,6 +44,7 @@ export const SettingsTab = () => {
       toast.success(t('auth.password_changed_success', 'Пароль успішно змінено'));
       setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const err = error as any;
       toast.error(err.response?.data?.detail || t('auth.error_generic', 'Помилка при зміні пароля'));
     } finally {
