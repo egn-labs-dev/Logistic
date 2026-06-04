@@ -11,7 +11,7 @@ class DataScrubber:
         # Phone numbers (international format, 10-13 digits)
         ("PHONE", re.compile(r"\+?\d{10,13}")),
         # Email addresses
-        ("EMAIL", re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")),
+        ("EMAIL", re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9.-]+[a-zA-Z0-9-]")),
         # Ukrainian license plates: AA1234BB, AA 1234 BB
         ("PLATE", re.compile(r"\b[A-ZА-ЯІЇЄҐ]{2}[\s-]?\d{4}[\s-]?[A-ZА-ЯІЇЄҐ]{2}\b")),
         # European license plates: common formats like ABC-1234, AB 123 CD

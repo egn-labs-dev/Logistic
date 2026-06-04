@@ -53,8 +53,13 @@ async def test_chat_endpoint_fail_safe_and_restoration():
         "text": "Вантаж з Києва. Мій тел +380670000000"
     }
     
+    from app.security.auth import get_organization_from_api_key
+    app.dependency_overrides[get_organization_from_api_key] = lambda: "org_test_metrics"
+    
     async with AsyncClient(app=app, base_url="http://test") as ac:
         response = await ac.post("/api/v1/chat", json=payload)
+        
+    app.dependency_overrides.clear()
         
     assert response.status_code == 200
     data = response.json()
@@ -94,6 +99,9 @@ async def test_dispatcher_intercept_flow():
         "text": "Ей, тут є хтось? Мені потрібна машина!"
     }
     
+    from app.security.auth import get_organization_from_api_key
+    app.dependency_overrides[get_organization_from_api_key] = lambda: org_id
+    
     async with AsyncClient(app=app, base_url="http://test") as ac:
         # Крок 0: Симулюємо перший запит, щоб створити сесію в БД
         await ac.post("/api/v1/chat", json=user_payload)
@@ -109,6 +117,8 @@ async def test_dispatcher_intercept_flow():
         
         # Крок 2: Надсилаємо повідомлення від користувача в цей же чат (публічний ендпоінт)
         chat_res = await ac.post("/api/v1/chat", json=user_payload)
+        
+    app.dependency_overrides.clear()
         
     assert chat_res.status_code == 200
     chat_data = chat_res.json()

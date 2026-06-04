@@ -17,10 +17,10 @@ MOCK_GEMINI_RESPONSE_TEXT = json.dumps({
         "cargo_type": "заморожена курка",
         "weight_tons": 3.0,
         "dimensions": {
-            "length_m": None,
-            "width_m": None,
-            "height_m": None,
-            "volume_m3": None
+            "length_m": 0.0,
+            "width_m": 0.0,
+            "height_m": 0.0,
+            "volume_m3": 0.0
         },
         "body_type_required": "refrigerator",
         "temperature_control": {
@@ -30,7 +30,7 @@ MOCK_GEMINI_RESPONSE_TEXT = json.dumps({
         },
         "adr_specification": {
             "is_dangerous": False,
-            "adr_class": None
+            "adr_class": ""
         },
         "detected_placeholders": ["[PHONE_0]"]
     },
@@ -49,6 +49,10 @@ async def test_complex_logistics_extraction(mock_analyze):
     mock_analyze.return_value = DispatcherLLMOutput(**json.loads(MOCK_GEMINI_RESPONSE_TEXT))
 
     import uuid
+    from app.security.auth import get_organization_from_api_key
+    
+    app.dependency_overrides[get_organization_from_api_key] = lambda: "org_logistics_test"
+
     random_session = f"session_test_{uuid.uuid4().hex[:8]}"
     payload = {
         "organization_id": "org_logistics_test",
@@ -58,6 +62,8 @@ async def test_complex_logistics_extraction(mock_analyze):
     
     async with AsyncClient(app=app, base_url="http://test") as ac:
         response = await ac.post("/api/v1/chat", json=payload)
+        
+    app.dependency_overrides.clear()
         
     assert response.status_code == 200
     data = response.json()
