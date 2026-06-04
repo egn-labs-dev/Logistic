@@ -43,7 +43,8 @@ export const SettingsTab = () => {
       });
       toast.success(t('auth.password_changed_success', 'Пароль успішно змінено'));
       setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as any;
       toast.error(err.response?.data?.detail || t('auth.error_generic', 'Помилка при зміні пароля'));
     } finally {
       setIsChangingPassword(false);
@@ -83,7 +84,7 @@ export const SettingsTab = () => {
       const res = await apiClient.post('/settings/apikeys');
       setApiKeys([res.data, ...apiKeys]);
       toast.success('Новий API ключ успішно згенеровано');
-    } catch (err) {
+    } catch {
       toast.error('Помилка генерації ключа');
     } finally {
       setIsGeneratingKey(false);
@@ -100,7 +101,7 @@ export const SettingsTab = () => {
       await apiClient.delete(`/settings/apikeys/${id}`);
       setApiKeys(apiKeys.filter(k => k.id !== id));
       toast.success('Ключ успішно видалено');
-    } catch (err) {
+    } catch {
       toast.error('Помилка видалення ключа');
     }
   };
@@ -115,7 +116,7 @@ export const SettingsTab = () => {
     try {
       await apiClient.put('/settings/prompt', { system_prompt: systemPrompt });
       toast.success('Системний промпт успішно збережено');
-    } catch (err) {
+    } catch {
       toast.error('Помилка збереження промпту');
     } finally {
       setIsSavingPrompt(false);
