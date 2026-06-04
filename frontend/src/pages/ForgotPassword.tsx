@@ -20,7 +20,7 @@ export const ForgotPassword = () => {
     try {
       await apiClient.post('/auth/forgot-password', { email });
       setSuccess(true);
-    } catch (err: any) {
+    } catch {
       setErrorMsg(t('auth.error_generic', 'Помилка при відправці запиту. Спробуйте пізніше.'));
     } finally {
       setLoading(false);

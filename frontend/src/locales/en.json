@@ -78,7 +78,22 @@
     "restore_password": "Restore Password",
     "cancel": "Cancel",
     "passwords_dont_match": "Passwords don't match",
-    "link_expired": "Link is invalid or expired. Please request a new one."
+    "link_expired": "Link is invalid or expired. Please request a new one.",
+    "password_placeholder": "Minimum 8 characters",
+    "org_id_label": "Organization ID",
+    "org_id_placeholder": "E.g. logistic_pro_kyiv",
+    "org_id_hint": "This ID is used for database isolation (RLS).",
+    "org_id_validation": "Only lowercase latin letters, digits and underscores",
+    "terms_agreement": "I agree to the Terms of Service and Privacy Policy. I understand that the system uses LLMs and all PII is pre-processed via Data Scrubber.",
+    "data_isolated": "Data is isolated (Zero Trust RLS)",
+    "email_exists": "This Email is already registered or data is invalid.",
+    "register_error": "Registration error. Please try again later."
+  },
+  "notfound": {
+    "title": "Page Not Found",
+    "description": "It seems this page does not exist. The link might be outdated or the page was removed by security policies.",
+    "go_home": "Back to Home",
+    "footer": "Zero Trust Dispatch LLC. Access Logged."
   },
   "chat": {
     "history": "Chat History",
@@ -86,7 +101,12 @@
     "human_controlled": "Client is waiting for a response. Dialog intercepted.",
     "type_message": "Type a message to the client...",
     "error_loading": "Error loading chat history",
-    "sending": "Sending..."
+    "sending": "Sending...",
+    "client": "Client"
+  },
+  "alerts": {
+    "intercept_success": "Session successfully intercepted. AI disabled.",
+    "intercept_error": "Error intercepting chat. Please try again."
   },
   "cookie": {
     "title": "We use cookies",

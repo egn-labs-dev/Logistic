@@ -7,6 +7,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import apiClient from '@/api/client';
 import { useAuthStore } from '@/store/authStore';
+import { AxiosError } from 'axios';
 
 export const Register = () => {
   const [email, setEmail] = useState('');
@@ -46,12 +47,11 @@ export const Register = () => {
       const { access_token } = loginRes.data;
       setToken(access_token);
       navigate('/');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      if (error.response?.status === 400) {
-        setErrorMsg('Цей Email вже зареєстровано або введені дані некоректні.');
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response?.status === 400) {
+        setErrorMsg(t('auth.email_exists'));
       } else {
-        setErrorMsg('Виникла помилка при реєстрації. Спробуйте пізніше.');
+        setErrorMsg(t('auth.register_error'));
       }
     } finally {
       setLoading(false);
@@ -89,7 +89,7 @@ export const Register = () => {
             <label className="text-sm font-medium text-slate-700">{t('auth.password')}</label>
             <Input 
               type="password" 
-              placeholder="Мінімум 8 символів" 
+              placeholder={t('auth.password_placeholder')}
               className="h-11" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -101,19 +101,19 @@ export const Register = () => {
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
               <Building2 className="w-4 h-4 text-slate-400" />
-              ID Організації
+              {t('auth.org_id_label')}
             </label>
             <Input 
               type="text" 
-              placeholder="Наприклад: logistic_pro_kyiv" 
+              placeholder={t('auth.org_id_placeholder')}
               className="h-11 font-mono text-sm bg-slate-50" 
               value={orgId}
               onChange={(e) => setOrgId(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
               required 
               pattern="^[a-z0-9_]+$"
-              title="Тільки маленькі латинські літери, цифри та нижнє підкреслення"
+              title={t('auth.org_id_validation')}
             />
-            <p className="text-[11px] text-slate-400">Цей ID використовується для ізоляції бази даних (RLS).</p>
+            <p className="text-[11px] text-slate-400">{t('auth.org_id_hint')}</p>
           </div>
 
           <div className="flex items-start space-x-2 pt-2">
@@ -126,7 +126,7 @@ export const Register = () => {
               required
             />
             <label htmlFor="terms" className="text-xs text-slate-500 leading-tight">
-              Я погоджуюсь з <Link to="/terms" className="text-indigo-600 hover:underline" target="_blank">Terms of Service</Link> та <Link to="/privacy" className="text-indigo-600 hover:underline" target="_blank">Privacy Policy</Link>. Я розумію, що система використовує LLM, а всі персональні дані проходять попередню обробку через Data Scrubber.
+              {t('auth.terms_agreement')}
             </label>
           </div>
 
@@ -152,7 +152,7 @@ export const Register = () => {
 
         <div className="mt-8 flex justify-center items-center gap-2 text-slate-400 text-sm">
           <Lock className="w-4 h-4" />
-          <span>Дані ізольовано (Zero Trust RLS)</span>
+          <span>{t('auth.data_isolated')}</span>
         </div>
       </div>
     </div>

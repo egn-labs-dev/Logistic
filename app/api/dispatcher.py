@@ -1,10 +1,11 @@
-import jwt
+from datetime import datetime, timedelta
+from collections import defaultdict
 from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func, cast, Integer
 from app.db.database import get_db_session_with_rls
 from app.db.models import CargoOrder, ImmutableAuditLog
-from app.security.auth import SECRET_KEY, ALGORITHM, oauth2_scheme, TokenData, get_current_user_token_data, require_dispatcher_role
+from app.security.auth import TokenData, get_current_user_token_data, require_dispatcher_role
 from app.security.scrubber import DataScrubber
 
 router = APIRouter(prefix="/api/v1/dispatcher", tags=["Dispatcher Console (HITL)"])
@@ -51,12 +52,14 @@ async def get_chat_history(session_id: str, current_user: TokenData = Depends(re
         
         history = []
         for log in logs:
-            # De-anonymize on the fly to display real data to the dispatcher
-            clean_prompt = DataScrubber.deanonymize(log.clean_prompt, log.vault_snapshot)
-            clean_response = DataScrubber.deanonymize(log.clean_response, log.vault_snapshot)
-            
-            history.append({"role": "user", "text": clean_prompt, "timestamp": log.timestamp})
-            history.append({"role": "assistant", "text": clean_response, "timestamp": log.timestamp})
+            if log.clean_prompt == "[MANUAL_OPERATOR]":
+                clean_response = DataScrubber.deanonymize(log.clean_response, log.vault_snapshot)
+                history.append({"role": "assistant", "text": f"[MANUAL_OPERATOR]{clean_response}", "timestamp": log.timestamp})
+            else:
+                clean_prompt = DataScrubber.deanonymize(log.clean_prompt, log.vault_snapshot)
+                clean_response = DataScrubber.deanonymize(log.clean_response, log.vault_snapshot)
+                history.append({"role": "user", "text": clean_prompt, "timestamp": log.timestamp})
+                history.append({"role": "assistant", "text": clean_response, "timestamp": log.timestamp})
             
         return history
 
@@ -86,25 +89,24 @@ async def send_manual_message(msg: ManualMessage, current_user: TokenData = Depe
         
         return {"status": "sent"}
 
-from datetime import datetime, timedelta
-from collections import defaultdict
-
 @router.get("/stats", status_code=status.HTTP_200_OK)
 async def get_analytics_stats(current_user: TokenData = Depends(require_dispatcher_role)):
     async with get_db_session_with_rls(current_user.organization_id) as session:
-        # Get all orders to calculate Autonomy Rate & Active Incidents
-        orders_query = select(CargoOrder)
-        orders_result = await session.execute(orders_query)
-        orders = orders_result.scalars().all()
+        # SQL Aggregation for efficiency
+        query = select(
+            func.count(CargoOrder.id).label("total"),
+            func.sum(cast(CargoOrder.status == "human_required", Integer)).label("active"),
+            func.sum(cast(CargoOrder.status == "human_controlled", Integer)).label("controlled")
+        )
+        result = await session.execute(query)
+        stats_row = result.fetchone()
         
-        total_sessions = len(orders)
-        active_incidents = sum(1 for o in orders if o.status == "human_required")
-        controlled_incidents = sum(1 for o in orders if o.status == "human_controlled")
+        total_sessions = stats_row.total or 0
+        active_incidents = stats_row.active or 0
+        controlled_incidents = stats_row.controlled or 0
         autonomous_sessions = total_sessions - active_incidents - controlled_incidents
         
         autonomy_rate = (autonomous_sessions / total_sessions * 100) if total_sessions > 0 else 100
-        
-        # Estimate Cost Savings (e.g. 15 mins saved per autonomous session = 0.25 hours)
         cost_savings_hours = autonomous_sessions * 0.25
         
         # Fetch logs for the chart (last 7 days)

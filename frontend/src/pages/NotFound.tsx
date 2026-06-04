@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { FileQuestion, ShieldAlert, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 export const NotFound = () => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 relative overflow-hidden">
       {/* Decorative background elements */}
@@ -17,23 +19,23 @@ export const NotFound = () => {
         </div>
         
         <h1 className="text-4xl font-extrabold text-slate-900 mb-2">404</h1>
-        <h2 className="text-xl font-bold text-slate-800 mb-4">Сторінку не знайдено</h2>
+        <h2 className="text-xl font-bold text-slate-800 mb-4">{t('notfound.title')}</h2>
         
         <p className="text-slate-500 mb-8 max-w-sm">
-          Схоже, такої сторінки не існує. Можливо, посилання застаріло або сторінку було видалено політиками безпеки.
+          {t('notfound.description')}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
           <Button asChild variant="default" className="bg-indigo-600 hover:bg-indigo-700 h-11 px-8">
             <Link to="/">
-              <ArrowLeft className="w-4 h-4 mr-2" /> Повернутися на Головну
+              <ArrowLeft className="w-4 h-4 mr-2" /> {t('notfound.go_home')}
             </Link>
           </Button>
         </div>
 
         <div className="mt-8 pt-6 border-t border-slate-100 w-full flex items-center justify-center text-xs text-slate-400 font-medium">
           <ShieldAlert className="w-4 h-4 mr-1.5 text-slate-400" />
-          Zero Trust Dispatch LLC. Access Logged.
+          {t('notfound.footer')}
         </div>
       </div>
     </div>

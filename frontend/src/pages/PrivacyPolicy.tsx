@@ -10,7 +10,7 @@ export const PrivacyPolicy = () => {
           </div>
           <div>
             <h1 className="text-3xl font-bold text-slate-900">Privacy Policy</h1>
-            <p className="text-slate-500">Effective Date: {new Date().toLocaleDateString()}</p>
+            <p className="text-slate-500">Effective Date: 2024-05-01</p>
           </div>
         </div>
 

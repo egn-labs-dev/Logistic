@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner';
 import { ChatHistoryModal } from '@/components/ChatHistoryModal';
 import { EfficiencyChart } from '@/components/EfficiencyChart';
+import { SettingsTab } from '@/components/SettingsTab';
 import { cn } from '@/lib/utils';
 
 export const Dashboard = () => {
@@ -367,23 +368,45 @@ export const Dashboard = () => {
           {activeNav === 'alerts' && (
             <div className="max-w-7xl mx-auto space-y-6">
                <h2 className="text-2xl font-semibold mb-6 text-white">{t('dashboard.alerts_tab.title')}</h2>
-               <div className="bg-[#09090b]/60 border border-slate-800/60 rounded-xl p-12 flex flex-col items-center justify-center text-center text-slate-500">
-                  <BellRing className="w-12 h-12 mb-4 text-slate-700" />
-                  <p className="text-lg text-slate-300">{t('dashboard.alerts_tab.subtitle')}</p>
-                  <p className="text-sm mt-2 max-w-md">{t('dashboard.alerts_tab.description')}</p>
-               </div>
+               {alerts && alerts.length > 0 ? (
+                 <div className="grid gap-4">
+                   {alerts.map((alert: { id: string, session_id: string, status: string }) => (
+                     <div key={alert.id} className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 flex justify-between items-center hover:bg-slate-800/50 transition-colors">
+                       <div>
+                         <div className="font-mono text-sm text-slate-300 mb-1">{alert.session_id}</div>
+                         <div className="text-xs text-slate-500">
+                           Статус: <span className={cn(
+                             "font-semibold",
+                             alert.status === 'human_controlled' ? "text-indigo-400" : "text-red-400"
+                           )}>
+                             {alert.status === 'human_controlled' ? t('dashboard.live_feed.under_control') : t('dashboard.live_feed.sos')}
+                           </span>
+                         </div>
+                       </div>
+                       <Button
+                         variant="outline"
+                         size="sm"
+                         onClick={() => setHistorySessionId(alert.session_id)}
+                         className="bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+                       >
+                         <History className="w-4 h-4 mr-2" />
+                         Переглянути чат
+                       </Button>
+                     </div>
+                   ))}
+                 </div>
+               ) : (
+                 <div className="bg-[#09090b]/60 border border-slate-800/60 rounded-xl p-12 flex flex-col items-center justify-center text-center text-slate-500">
+                    <BellRing className="w-12 h-12 mb-4 text-slate-700" />
+                    <p className="text-lg text-slate-300">Інцидентів немає</p>
+                    <p className="text-sm mt-2 max-w-md">Всі сесії обробляються автономно</p>
+                 </div>
+               )}
             </div>
           )}
 
           {activeNav === 'settings' && (
-            <div className="max-w-7xl mx-auto space-y-6">
-               <h2 className="text-2xl font-semibold mb-6 text-white">{t('dashboard.settings_tab.title')}</h2>
-               <div className="bg-[#09090b]/60 border border-slate-800/60 rounded-xl p-12 flex flex-col items-center justify-center text-center text-slate-500">
-                  <Settings className="w-12 h-12 mb-4 text-slate-700" />
-                  <p className="text-lg text-slate-300">{t('dashboard.settings_tab.subtitle')}</p>
-                  <p className="text-sm mt-2 max-w-md">{t('dashboard.settings_tab.description')}</p>
-               </div>
-            </div>
+            <SettingsTab />
           )}
         </div>
       </main>

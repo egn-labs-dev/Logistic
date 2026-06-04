@@ -1,19 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Cookie, X } from 'lucide-react';
+import { Cookie, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 
 export const CookieConsent = () => {
+  const [isVisible, setIsVisible] = useState(() => !localStorage.getItem('cookie_consent'));
   const { t } = useTranslation();
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const consent = localStorage.getItem('cookie_consent');
-    if (!consent) {
-      setIsVisible(true);
-    }
-  }, []);
 
   const handleAccept = () => {
     localStorage.setItem('cookie_consent', 'accepted');
@@ -21,6 +14,7 @@ export const CookieConsent = () => {
   };
 
   const handleDecline = () => {
+    localStorage.setItem('cookie_consent', 'declined');
     setIsVisible(false);
   };
 
@@ -48,7 +42,7 @@ export const CookieConsent = () => {
             onClick={handleAccept} 
             className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white"
           >
-            <X className="w-5 h-5" />
+            <Check className="w-5 h-5 mr-1" /> {t('cookie.accept', 'Accept')}
           </Button>
         </div>
       </div>

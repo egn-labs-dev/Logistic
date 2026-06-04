@@ -11,3 +11,9 @@ ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY audit_logs_isolation_policy ON audit_logs
     USING (organization_id = current_setting('app.current_organization_id', true));
+
+-- RLS for users table
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users FORCE ROW LEVEL SECURITY;
+CREATE POLICY users_isolation ON users
+  USING (organization_id = current_setting('app.current_organization_id', true));

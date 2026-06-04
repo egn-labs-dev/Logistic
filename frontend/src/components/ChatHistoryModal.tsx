@@ -84,7 +84,7 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
                     
                     return (
                       <div
-                        key={index}
+                        key={msg.timestamp + msg.role + index}
                         className={`flex flex-col max-w-[80%] rounded-xl p-4 ${
                           isUser
                             ? 'bg-blue-600 text-white self-end rounded-tr-sm'
@@ -95,7 +95,7 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
                       >
                         <div className="text-sm opacity-70 mb-1 flex justify-between items-center">
                           <span className="font-semibold uppercase tracking-wider text-[10px]">
-                            {isUser ? 'Client' : (isManual ? t('dashboard.dispatcher') : 'AI')}
+                            {isUser ? t('chat.client') : (isManual ? t('dashboard.dispatcher') : 'AI')}
                           </span>
                           <span className="text-[10px] ml-4">
                             {format(new Date(msg.timestamp), 'p', { locale: currentLocale })}

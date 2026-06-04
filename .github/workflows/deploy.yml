@@ -26,11 +26,11 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     # --- FRONTEND JOBS ---
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'npm'
@@ -43,16 +43,16 @@ jobs:
     - name: Frontend Lint & Build
       working-directory: ./frontend
       run: |
-        npm run lint || echo "Linting failed but continuing for MVP"
+        npm run lint
         npm run build
 
     - name: Frontend Security Audit
       working-directory: ./frontend
-      run: npm audit
+      run: npm audit --audit-level=high
 
     # --- BACKEND JOBS ---
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         cache: 'pip'
@@ -68,4 +68,4 @@ jobs:
         GEMINI_API_KEY: "dummy-key-for-tests"
         TESTING: "True"
       run: |
-        pytest tests/ -v
+        pytest tests/ -v --tb=short

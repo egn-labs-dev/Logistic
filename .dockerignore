@@ -1,0 +1,17 @@
+.env
+.env.*
+.git
+.github
+venv/
+__pycache__/
+*.pyc
+tests/
+config/role_id
+config/secret_id
+*.md
+!requirements.txt
+node_modules/
+frontend/
+assets/
+.pytest_cache/
+*.db

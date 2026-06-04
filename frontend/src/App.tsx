@@ -10,14 +10,16 @@ import { ForgotPassword } from '@/pages/ForgotPassword';
 import { ResetPassword } from '@/pages/ResetPassword';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { CookieConsent } from '@/components/CookieConsent';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useAuthStore } from '@/store/authStore';
 
 function App() {
   const token = useAuthStore((state) => state.token);
 
   return (
-    <Router>
-      <Routes>
+    <ErrorBoundary>
+      <Router>
+        <Routes>
         <Route 
           path="/login" 
           element={token ? <Navigate to="/" replace /> : <Login />} 
@@ -41,6 +43,7 @@ function App() {
       </Routes>
       <CookieConsent />
     </Router>
+    </ErrorBoundary>
   );
 }
 

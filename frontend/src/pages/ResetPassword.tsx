@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { KeyRound, ArrowLeft, Loader2, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import apiClient from '@/api/client';
 import { useTranslation } from 'react-i18next';
+import { AxiosError } from 'axios';
 
 export const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -30,9 +32,14 @@ export const ResetPassword = () => {
       await apiClient.post('/auth/reset-password', { token, new_password: password });
       
       // Navigate to login after success
-      navigate('/login', { state: { message: 'Пароль успішно змінено. Ви можете увійти.' } });
-    } catch (err: any) {
-      setErrorMsg('Посилання недійсне або термін його дії минув. Зробіть новий запит.');     setLoading(false);
+      navigate('/login', { state: { message: t('auth.password_changed') } });
+    } catch (err: unknown) {
+      if (err instanceof AxiosError && err.response) {
+        setErrorMsg(t('auth.link_expired'));
+      } else {
+        setErrorMsg(t('auth.link_expired'));
+      }
+      setLoading(false);
     }
   };
 
@@ -63,24 +70,24 @@ export const ResetPassword = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">{t('auth.new_password')}</label>
-            <input 
+            <Input 
               type="password" 
-              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
+              className="w-full h-11"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required 
-              minLength={6}
+              minLength={8}
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">{t('auth.confirm_password')}</label>
-            <input 
+            <Input 
               type="password" 
-              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
+              className="w-full h-11"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required 
-              minLength={6}
+              minLength={8}
             />
           </div>
 

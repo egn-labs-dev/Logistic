@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../api/client';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export const useAlerts = () => {
   return useQuery({
@@ -15,14 +16,16 @@ export const useAlerts = () => {
 
 export const useIntercept = () => {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
+  
   return useMutation({
     mutationFn: (session_id: string) => apiClient.post('/dispatcher/intercept', { session_id }),
     onSuccess: (_, session_id) => {
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
-      toast.success(`Сесію ${session_id} успішно перехоплено. ШІ вимкнено.`);
+      toast.success(t('alerts.intercept_success') + ` (${session_id})`);
     },
     onError: () => {
-      toast.error('Помилка при перехопленні чату. Спробуйте ще раз.');
+      toast.error(t('alerts.intercept_error'));
     }
   });
 };

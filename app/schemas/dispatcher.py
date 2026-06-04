@@ -12,37 +12,37 @@ class BodyType(str, Enum):
     NOT_SPECIFIED = "not_specified"
 
 class TemperatureRegime(BaseModel):
-    is_required: bool = Field(False, description="Is temperature control required (for reefers)")
-    min_celsius: Optional[float] = Field(None, description="Minimum temperature in degrees Celsius")
-    max_celsius: Optional[float] = Field(None, description="Maximum temperature in degrees Celsius")
+    is_required: bool = Field(description="Is temperature control required (for reefers)")
+    min_celsius: float = Field(description="Minimum temperature in degrees Celsius. Return 0.0 if not specified.")
+    max_celsius: float = Field(description="Maximum temperature in degrees Celsius. Return 0.0 if not specified.")
 
 class CargoDimensions(BaseModel):
-    length_m: Optional[float] = Field(None, description="Length in meters")
-    width_m: Optional[float] = Field(None, description="Width in meters")
-    height_m: Optional[float] = Field(None, description="Height in meters")
-    volume_m3: Optional[float] = Field(None, description="Total volume in cubic meters")
+    length_m: float = Field(description="Length in meters. Return 0.0 if not specified.")
+    width_m: float = Field(description="Width in meters. Return 0.0 if not specified.")
+    height_m: float = Field(description="Height in meters. Return 0.0 if not specified.")
+    volume_m3: float = Field(description="Total volume in cubic meters. Return 0.0 if not specified.")
 
 class ADRDetails(BaseModel):
-    is_dangerous: bool = Field(False, description="Is the cargo dangerous (ADR)")
-    adr_class: Optional[str] = Field(None, description="ADR hazard class (e.g., Class 3 - flammable liquids)")
+    is_dangerous: bool = Field(description="Is the cargo dangerous (ADR)")
+    adr_class: str = Field(description="ADR hazard class (e.g., Class 3 - flammable liquids). Return empty string if not specified.")
 
 # 2. Extended model for cargo details
 class ExtractedCargoDetails(BaseModel):
-    departure_city: Optional[str] = Field(None, description="City/country of departure (e.g., Warsaw, Poland)")
-    destination_city: Optional[str] = Field(None, description="City/country of delivery")
-    cargo_type: Optional[str] = Field(None, description="Detailed description of goods (electronics, frozen fish, furniture)")
-    weight_tons: Optional[float] = Field(None, description="Total cargo weight in TONS (if specified in kg - convert to tons)")
+    departure_city: str = Field(description="City/country of departure (e.g., Warsaw, Poland). Return empty string if not specified.")
+    destination_city: str = Field(description="City/country of delivery. Return empty string if not specified.")
+    cargo_type: str = Field(description="Detailed description of goods (electronics, frozen fish, furniture). Return empty string if not specified.")
+    weight_tons: float = Field(description="Total cargo weight in TONS (if specified in kg - convert to tons). Return 0.0 if not specified.")
     
-    dimensions: CargoDimensions = Field(default_factory=CargoDimensions)
-    body_type_required: BodyType = Field(default=BodyType.NOT_SPECIFIED)
-    temperature_control: TemperatureRegime = Field(default_factory=TemperatureRegime)
-    adr_specification: ADRDetails = Field(default_factory=ADRDetails)
+    dimensions: CargoDimensions = Field(description="Cargo dimensions")
+    body_type_required: BodyType = Field(description="Required body type")
+    temperature_control: TemperatureRegime = Field(description="Temperature regime details")
+    adr_specification: ADRDetails = Field(description="ADR details")
     
-    detected_placeholders: List[str] = Field(default=[], description="Detected masks, e.g., [PHONE_0]")
+    detected_placeholders: list[str] = Field(description="Detected masks, e.g., [PHONE_0]. Return empty list if none.")
 
 # 3. Main output container for Gemini
 class DispatcherLLMOutput(BaseModel):
-    is_qualified_lead: bool = Field(..., description="True if there is a clear request for cargo transportation and at least a route is specified")
-    requires_human_intervention: bool = Field(..., description="True if the client is dissatisfied or the request is too confusing")
+    is_qualified_lead: bool = Field(description="True if there is a clear request for cargo transportation and at least a route is specified")
+    requires_human_intervention: bool = Field(description="True if the client is dissatisfied or the request is too confusing")
     extracted_data: ExtractedCargoDetails
-    response_to_user: str = Field(..., description="Polite response to the user confirming cargo parameters.")
+    response_to_user: str = Field(description="Polite response to the user confirming cargo parameters.")

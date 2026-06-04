@@ -16,9 +16,11 @@ interface EfficiencyData {
 
 interface EfficiencyChartProps {
   data: EfficiencyData[]
+  manualLabel?: string;
+  autonomousLabel?: string;
 }
 
-export function EfficiencyChart({ data }: EfficiencyChartProps) {
+export function EfficiencyChart({ data, manualLabel = "Manual", autonomousLabel = "Autonomous" }: EfficiencyChartProps) {
   return (
     <div className="h-[400px] w-full mt-4">
       <ResponsiveContainer width="100%" height="100%">
@@ -63,7 +65,7 @@ export function EfficiencyChart({ data }: EfficiencyChartProps) {
           <Area
             type="monotone"
             dataKey="manual"
-            name="Ручне втручання"
+            name={manualLabel}
             stroke="#f59e0b"
             fillOpacity={1}
             fill="url(#colorManual)"
@@ -71,7 +73,7 @@ export function EfficiencyChart({ data }: EfficiencyChartProps) {
           <Area
             type="monotone"
             dataKey="autonomous"
-            name="Автономно (ШІ)"
+            name={autonomousLabel}
             stroke="#3b82f6"
             fillOpacity={1}
             fill="url(#colorAutonomous)"

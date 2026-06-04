@@ -3,9 +3,10 @@ import { useAuthStore } from '../store/authStore';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api/v1',
+  timeout: 30000,
 });
 
-// Interceptor: automatically attaches token to all requests
+// Request interceptor: automatically attaches token to all requests
 apiClient.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token) {
@@ -13,5 +14,17 @@ apiClient.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Response interceptor: handle 401 (expired/invalid token)
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      useAuthStore.getState().clearToken();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default apiClient;
