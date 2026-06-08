@@ -1,5 +1,7 @@
 from typing import Dict
+
 from pydantic import BaseModel, Field
+
 
 class IncomingMessage(BaseModel):
     session_id: str = Field(..., description="Dialogue session ID")

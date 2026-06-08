@@ -1,9 +1,11 @@
-import uuid
-import secrets
 import json
+import secrets
+import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Text, DateTime, JSON, func, UUID, Boolean
-from sqlalchemy.orm import declarative_base, Mapped, mapped_column
+
+from sqlalchemy import (JSON, UUID, Boolean, Column, DateTime, String, Text,
+                        func)
+from sqlalchemy.orm import Mapped, declarative_base, mapped_column
 
 Base = declarative_base()
 

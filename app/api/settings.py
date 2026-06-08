@@ -1,12 +1,14 @@
-import uuid
 import secrets
+import uuid
 from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy import select
+
 from app.db.database import AsyncSessionLocal
 from app.db.models import ApiKey, OrganizationSetting
-from app.security.auth import get_current_user_token_data, TokenData
+from app.security.auth import TokenData, get_current_user_token_data
 
 router = APIRouter(prefix="/api/v1/settings", tags=["Settings"])
 

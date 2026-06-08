@@ -1,8 +1,9 @@
 import os
 from contextlib import asynccontextmanager
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 
 from app.core.config import settings
@@ -30,8 +31,10 @@ AsyncSessionLocal = sessionmaker(
     expire_on_commit=False,
 )
 
-from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 import os
+
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+
 if os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT"):
     try:
         SQLAlchemyInstrumentor().instrument(engine=engine.sync_engine)

@@ -1,10 +1,13 @@
-import os
-import json
 import asyncio
+import json
+import os
+
 from google import genai
 from google.genai import types
 from tenacity import retry, stop_after_attempt, wait_exponential
+
 from app.schemas.dispatcher import DispatcherLLMOutput, ExtractedCargoDetails
+
 
 class GeminiDispatcherService:
     def __init__(self):
@@ -55,7 +58,10 @@ class GeminiDispatcherService:
             return DispatcherLLMOutput(**data_dict)
         except Exception as e:
             import logging
-            from app.schemas.dispatcher import CargoDimensions, BodyType, TemperatureRegime, ADRDetails
+
+            from app.schemas.dispatcher import (ADRDetails, BodyType,
+                                                CargoDimensions,
+                                                TemperatureRegime)
             logging.error(f"Gemini Service Error: {e}")
             # Our robust Fail-safe contour
             return DispatcherLLMOutput(

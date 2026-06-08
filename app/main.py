@@ -1,11 +1,11 @@
+import logging
 import os
 import sys
-import logging
 from contextlib import asynccontextmanager
-from pythonjsonlogger import jsonlogger
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pythonjsonlogger import jsonlogger
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
@@ -13,13 +13,13 @@ from app.api.auth import router as auth_router
 from app.api.chat import router as chat_router
 from app.api.dispatcher import router as dispatcher_router
 from app.api.settings import router as settings_router
-from app.api.webhooks import router as webhooks_router
 from app.api.waitlist import router as waitlist_router
+from app.api.webhooks import router as webhooks_router
+from app.core.config import settings
+from app.core.telemetry import setup_telemetry
 from app.db.database import engine
 from app.db.models import Base
-from app.core.config import settings
 from app.security.rate_limiter import limiter
-from app.core.telemetry import setup_telemetry
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

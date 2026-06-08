@@ -1,11 +1,14 @@
-from datetime import datetime, timedelta
 from collections import defaultdict
-from fastapi import APIRouter, HTTPException, status, Depends, BackgroundTasks
+from datetime import datetime, timedelta
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from pydantic import BaseModel
-from sqlalchemy import select, update, func, cast, Integer
+from sqlalchemy import Integer, cast, func, select, update
+
 from app.db.database import get_db_session_with_rls
 from app.db.models import CargoOrder, ImmutableAuditLog
-from app.security.auth import TokenData, get_current_user_token_data, require_dispatcher_role
+from app.security.auth import (TokenData, get_current_user_token_data,
+                               require_dispatcher_role)
 from app.security.scrubber import DataScrubber
 from app.services.billing import report_successful_lead_to_stripe
 

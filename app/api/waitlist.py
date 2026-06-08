@@ -1,11 +1,13 @@
 import os
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.webhooks import send_telegram_message
 from app.db.database import get_db
 from app.db.models import WaitlistLead
-from app.api.webhooks import send_telegram_message
 
 router = APIRouter()
 

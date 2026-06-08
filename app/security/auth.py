@@ -1,15 +1,17 @@
+import logging
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
-import jwt
+
 import bcrypt
-from fastapi import HTTPException, status, Depends
-from fastapi.security import OAuth2PasswordBearer, APIKeyHeader
+import jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
 from pydantic import BaseModel
 from sqlalchemy import select
+
 from app.db.database import AsyncSessionLocal
 from app.db.models import ApiKey
-import logging
 
 # Налаштування безпеки (в продакшені SECRET_KEY береться з .env)
 SECRET_KEY = os.getenv("JWT_SECRET_KEY") or ("test-secret-key-do-not-use-in-production" if os.getenv("TESTING") == "True" else "")

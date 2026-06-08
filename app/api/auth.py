@@ -1,12 +1,18 @@
 import re
 from datetime import timedelta
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy import select
 from pydantic import BaseModel, EmailStr
+from sqlalchemy import select
+
 from app.db.database import AsyncSessionLocal
 from app.db.models import User
-from app.security.auth import verify_password, create_access_token, get_password_hash, ACCESS_TOKEN_EXPIRE_MINUTES, create_reset_token, verify_reset_token, create_refresh_token, verify_refresh_token, get_current_user_token_data, TokenData
+from app.security.auth import (ACCESS_TOKEN_EXPIRE_MINUTES, TokenData,
+                               create_access_token, create_refresh_token,
+                               create_reset_token, get_current_user_token_data,
+                               get_password_hash, verify_password,
+                               verify_refresh_token, verify_reset_token)
 from app.services.email_service import send_password_reset_email
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Authentication"])

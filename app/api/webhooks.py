@@ -1,12 +1,13 @@
 import os
+
 import httpx
-from fastapi import APIRouter, Request, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from sqlalchemy import select
 
+from app.api.chat import process_secure_message
 from app.db.database import AsyncSessionLocal
 from app.db.models import ApiKey
 from app.schemas.chat import IncomingMessage
-from app.api.chat import process_secure_message
 
 router = APIRouter(prefix="/api/v1/webhooks", tags=["Webhooks"])
 

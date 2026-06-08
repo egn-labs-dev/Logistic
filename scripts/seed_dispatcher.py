@@ -1,8 +1,11 @@
 import asyncio
+
 from sqlalchemy import select
+
 from app.db.database import AsyncSessionLocal
 from app.db.models import User
 from app.security.auth import get_password_hash
+
 
 async def main():
     async with AsyncSessionLocal() as session:

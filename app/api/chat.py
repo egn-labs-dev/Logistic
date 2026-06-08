@@ -1,15 +1,16 @@
 import json
 import logging
-from fastapi import APIRouter, HTTPException, status, Request, Depends
-from app.schemas.chat import IncomingMessage, ChatResponse
-from app.security.scrubber import DataScrubber
-from app.services.gemini_service import GeminiDispatcherService
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy import select
+
 from app.db.database import get_db_session_with_rls
 from app.db.models import CargoOrder, ImmutableAuditLog, OrganizationSetting
-from app.security.rate_limiter import limiter
+from app.schemas.chat import ChatResponse, IncomingMessage
 from app.security.auth import get_organization_from_api_key
-
-from sqlalchemy import select
+from app.security.rate_limiter import limiter
+from app.security.scrubber import DataScrubber
+from app.services.gemini_service import GeminiDispatcherService
 
 router = APIRouter(prefix="/api/v1", tags=["Secure Chat Engine"])
 gemini_service = GeminiDispatcherService()

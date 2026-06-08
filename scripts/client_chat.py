@@ -1,9 +1,11 @@
 import asyncio
+import uuid
+
 import httpx
 from sqlalchemy import select
+
 from app.db.database import AsyncSessionLocal
 from app.db.models import ApiKey
-import uuid
 
 BASE_URL = "http://localhost:8000/api/v1"
 SESSION_ID = f"sim_{uuid.uuid4().hex[:8]}"

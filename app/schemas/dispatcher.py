@@ -1,6 +1,8 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List
 from enum import Enum
+from typing import List, Optional
+
+from pydantic import BaseModel, Field
+
 
 # 1. Enums for strict typing of logistics parameters
 class BodyType(str, Enum):

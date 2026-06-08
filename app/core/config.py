@@ -1,6 +1,6 @@
-import os
 import json
 import logging
+import os
 
 VAULT_SECRETS_PATH = "/vault/secrets/config.json"
 
