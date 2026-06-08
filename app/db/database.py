@@ -35,6 +35,9 @@ AsyncSessionLocal = sessionmaker(
     expire_on_commit=False,
 )
 
+# Alias for compatibility with external scripts/services
+async_session_maker = AsyncSessionLocal
+
 import os
 
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
