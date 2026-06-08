@@ -38,6 +38,10 @@ AsyncSessionLocal = sessionmaker(
 # Alias for compatibility with external scripts/services
 async_session_maker = AsyncSessionLocal
 
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session
+
 import os
 
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
