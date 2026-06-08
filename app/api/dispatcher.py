@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
 from collections import defaultdict
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, BackgroundTasks
 from pydantic import BaseModel
 from sqlalchemy import select, update, func, cast, Integer
 from app.db.database import get_db_session_with_rls
 from app.db.models import CargoOrder, ImmutableAuditLog
 from app.security.auth import TokenData, get_current_user_token_data, require_dispatcher_role
 from app.security.scrubber import DataScrubber
+from app.services.billing import report_successful_lead_to_stripe
 
 router = APIRouter(prefix="/api/v1/dispatcher", tags=["Dispatcher Console (HITL)"])
 
@@ -158,3 +159,30 @@ async def get_analytics_stats(current_user: TokenData = Depends(require_dispatch
             "cost_savings_hours": round(cost_savings_hours, 1),
             "chart_data": chart_data
         }
+
+class ResolveRequest(BaseModel):
+    session_id: str
+    resolution_status: str
+
+@router.post("/resolve", status_code=status.HTTP_200_OK)
+async def resolve_incident(
+    payload: ResolveRequest,
+    background_tasks: BackgroundTasks,
+    current_user: TokenData = Depends(require_dispatcher_role)
+):
+    """Закриття чату диспетчером (Deal Won / Deal Lost)"""
+    tenant_id = current_user.organization_id
+    
+    async with get_db_session_with_rls(tenant_id) as session:
+        query = (
+            update(CargoOrder)
+            .where(CargoOrder.session_id == payload.session_id)
+            .values(status=payload.resolution_status)
+        )
+        await session.execute(query)
+    
+    # Реєстрація платіжної події (Тільки для успішних угод!)
+    if payload.resolution_status == "resolved_won":
+        background_tasks.add_task(report_successful_lead_to_stripe, tenant_id, payload.session_id)
+    
+    return {"detail": f"Session resolved as {payload.resolution_status}"}

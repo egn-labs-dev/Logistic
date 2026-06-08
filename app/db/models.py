@@ -61,5 +61,6 @@ class OrganizationSetting(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     organization_id: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
     system_prompt: Mapped[str] = mapped_column(Text, nullable=True)
+    stripe_item_id: Mapped[str] = mapped_column(String, nullable=True, index=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
