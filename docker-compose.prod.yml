@@ -47,9 +47,12 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_HOST: db
       DB_NAME: logistics_secure_db
+      AUTH_TYPE: scram-sha-256
       POOL_MODE: transaction
       MAX_CLIENT_CONN: 1000
       DEFAULT_POOL_SIZE: 20
+      LISTEN_PORT: 6432
+      IGNORE_STARTUP_PARAMETERS: extra_float_digits, jit
     depends_on:
       db:
         condition: service_healthy
