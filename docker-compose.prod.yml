@@ -100,8 +100,6 @@ services:
   frontend:
     build: ./frontend
     restart: always
-    ports:
-      - "80:80"
     depends_on:
       api:
         condition: service_healthy
@@ -121,6 +119,23 @@ services:
     networks:
       - logistic-net
 
+  caddy:
+    image: caddy:2.7-alpine
+    container_name: ztd_caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - api
+    networks:
+      - logistic-net
+
 networks:
   logistic-net:
     driver: bridge
@@ -128,6 +143,8 @@ networks:
 volumes:
   pgdata:
   vault-data:
+  caddy_data:
+  caddy_config:
   shared-secrets:
     driver_opts:
       type: tmpfs
