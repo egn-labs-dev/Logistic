@@ -40,12 +40,38 @@ services:
     networks:
       - logistic-net
 
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    environment:
+      DB_USER: log_admin
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: db
+      DB_NAME: logistics_secure_db
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 1000
+      DEFAULT_POOL_SIZE: 20
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - logistic-net
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    networks:
+      - logistic-net
+
   api:
     build: .
     restart: always
     depends_on:
       db:
         condition: service_healthy
+      pgbouncer:
+        condition: service_started
+      redis:
+        condition: service_started
       vault-agent:
         condition: service_started
       jaeger:
@@ -56,8 +82,10 @@ services:
       - .env
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - DATABASE_URL=postgresql+asyncpg://log_admin:${DB_PASSWORD}@pgbouncer:6432/logistics_secure_db
+      - REDIS_URL=redis://redis:6379/0
     command: >
-      sh -c "alembic upgrade head && gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"
+      sh -c "DATABASE_URL=postgresql+asyncpg://log_admin:$${DB_PASSWORD}@db:5432/logistics_secure_db alembic upgrade head && gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

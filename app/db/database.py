@@ -15,7 +15,14 @@ is_testing = os.getenv("TESTING") == "True"
 engine = create_async_engine(
     DATABASE_URL, 
     echo=False, 
-    poolclass=NullPool if is_testing else None
+    poolclass=NullPool if is_testing else None,
+    pool_size=10,
+    max_overflow=20,
+    connect_args={
+        "server_settings": {"jit": "off"},
+        "statement_cache_size": 0,
+        "prepared_statement_cache_size": 0,
+    }
 )
 AsyncSessionLocal = sessionmaker(
     bind=engine,

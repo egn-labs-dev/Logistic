@@ -10,6 +10,7 @@ class Settings:
             "DATABASE_URL", 
             "postgresql+asyncpg://postgres:postgres@localhost:5434/logistics_db"
         )
+        self.redis_url = os.getenv("REDIS_URL", None)
         self.gemini_api_key = os.getenv("GEMINI_API_KEY", "")
         self.load_vault_secrets()
 
