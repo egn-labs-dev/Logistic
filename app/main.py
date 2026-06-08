@@ -13,6 +13,7 @@ from app.api.auth import router as auth_router
 from app.api.chat import router as chat_router
 from app.api.dispatcher import router as dispatcher_router
 from app.api.settings import router as settings_router
+from app.api.webhooks import router as webhooks_router
 from app.db.database import engine
 from app.db.models import Base
 from app.core.config import settings
@@ -63,6 +64,7 @@ app.include_router(auth_router)
 app.include_router(chat_router)
 app.include_router(dispatcher_router)
 app.include_router(settings_router)
+app.include_router(webhooks_router)
 
 setup_telemetry(app)
 
