@@ -69,3 +69,16 @@ jobs:
         TESTING: "True"
       run: |
         pytest tests/ -v --tb=short
+
+    # --- PLAYWRIGHT E2E ---
+    - name: Install Playwright Browsers
+      working-directory: ./frontend
+      run: npx playwright install --with-deps chromium
+
+    - name: Run Playwright E2E Tests
+      working-directory: ./frontend
+      run: npm run test:e2e
+
+    # --- DOCKER BUILD ---
+    - name: Build Production Docker Images
+      run: docker compose -f docker-compose.prod.yml build
