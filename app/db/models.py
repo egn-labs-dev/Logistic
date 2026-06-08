@@ -1,4 +1,5 @@
 import uuid
+import secrets
 import json
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, Text, DateTime, JSON, func, UUID, Boolean
@@ -64,3 +65,9 @@ class OrganizationSetting(Base):
     stripe_item_id: Mapped[str] = mapped_column(String, nullable=True, index=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
+class WaitlistLead(Base):
+    __tablename__ = "waitlist_leads"
+    
+    id = Column(String, primary_key=True, default=lambda: f"lead_{secrets.token_hex(8)}")
+    email = Column(String, unique=True, index=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

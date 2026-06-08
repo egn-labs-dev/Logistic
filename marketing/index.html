@@ -196,10 +196,51 @@
         <div class="container text-center relative z-10">
             <h2 class="text-3xl font-bold mb-4">Почніть автоматизацію вже сьогодні</h2>
             <p class="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">Зниження витрат на лідогенерацію та підтримку на 70%. Запустіть безкоштовний пілот на 14 днів у захищеному середовищі.</p>
-            <div class="flex justify-center gap-4">
-                <a href="mailto:hello@egn-labs.com" class="btn btn-primary btn-lg">Запросити доступ</a>
-                <a href="#" class="btn btn-outline btn-lg">Завантажити PDF</a>
-            </div>
+            <form id="waitlist-form" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto relative z-10">
+                <input type="email" id="waitlist-email" placeholder="Ваш робочий email" required class="flex-1 bg-slate-900/80 border border-slate-700 rounded-md px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button type="submit" id="waitlist-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-md px-6 py-3 transition-colors">
+                    Отримати доступ
+                </button>
+            </form>
+            <div id="waitlist-msg" class="mt-4 text-sm font-medium hidden relative z-10"></div>
+
+            <script>
+            document.getElementById('waitlist-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('waitlist-email').value;
+                const btn = document.getElementById('waitlist-btn');
+                const msg = document.getElementById('waitlist-msg');
+                
+                btn.disabled = true;
+                btn.innerHTML = 'Відправка...';
+                
+                try {
+                    const res = await fetch('/api/v1/waitlist/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    const data = await res.json();
+                    
+                    msg.classList.remove('hidden', 'text-rose-400', 'text-emerald-400');
+                    if (res.ok) {
+                        msg.classList.add('text-emerald-400');
+                        msg.textContent = 'Дякуємо! Ми зв\'яжемося з вами найближчим часом.';
+                        document.getElementById('waitlist-email').value = '';
+                    } else {
+                        msg.classList.add('text-rose-400');
+                        msg.textContent = data.detail || 'Помилка при відправці.';
+                    }
+                } catch (err) {
+                    msg.classList.remove('hidden');
+                    msg.classList.add('text-rose-400');
+                    msg.textContent = 'Помилка з\'єднання з сервером.';
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = 'Отримати доступ';
+                }
+            });
+            </script>
         </div>
     </section>
 
