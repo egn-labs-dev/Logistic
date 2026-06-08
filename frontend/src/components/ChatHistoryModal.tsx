@@ -38,8 +38,9 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
     e.preventDefault();
     if (!message.trim() || !sessionId) return;
 
-    sendMessageMutation.mutate({ sessionId, message });
-    setMessage('');
+    sendMessageMutation.mutate({ sessionId, message }, {
+      onSuccess: () => setMessage('')
+    });
   };
 
   return (
@@ -111,6 +112,19 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
             </div>
           )}
 
+          {sendMessageMutation.isError && (
+            <div className="mx-4 mb-3 p-3 bg-red-900/40 border border-red-500/50 rounded-lg text-red-200 text-sm flex justify-between items-center">
+              <span>{t('chat.send_error', 'Помилка відправки: Сервіс тимчасово недоступний.')}</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-7 text-xs border-red-500/50 hover:bg-red-900/50 text-red-200 bg-transparent"
+                onClick={() => sendMessageMutation.mutate({ sessionId: sessionId!, message })}
+              >
+                {t('chat.retry', 'Повторити спробу')}
+              </Button>
+            </div>
+          )}
           {isHumanControlled && (
             <form onSubmit={handleSend} className="flex gap-2 pt-2 border-t border-slate-800 mt-auto">
               <Input
