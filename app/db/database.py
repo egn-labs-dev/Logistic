@@ -13,18 +13,22 @@ DATABASE_URL = settings.database_url
 
 # Use NullPool for tests to avoid event loop conflicts (InterfaceError)
 is_testing = os.getenv("TESTING") == "True"
-engine = create_async_engine(
-    DATABASE_URL, 
-    echo=False, 
-    poolclass=NullPool if is_testing else None,
-    pool_size=10,
-    max_overflow=20,
-    connect_args={
+engine_kwargs = {
+    "echo": False,
+    "connect_args": {
         "server_settings": {"jit": "off"},
         "statement_cache_size": 0,
         "prepared_statement_cache_size": 0,
     }
-)
+}
+
+if is_testing:
+    engine_kwargs["poolclass"] = NullPool
+else:
+    engine_kwargs["pool_size"] = 10
+    engine_kwargs["max_overflow"] = 20
+
+engine = create_async_engine(DATABASE_URL, **engine_kwargs)
 AsyncSessionLocal = sessionmaker(
     bind=engine,
     class_=AsyncSession,
