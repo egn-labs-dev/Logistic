@@ -1,13 +1,25 @@
 # Тимчасовий домен. Caddy автоматично випустить для нього SSL, коли IP співпаде.
 app.zt-dispatch.tech {
-    # Перенаправляємо всі запити на наш фронтенд-контейнер
-    reverse_proxy frontend:80
-
     # Заголовки безпеки (Security Headers) для Enterprise-рівня
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         X-Content-Type-Options "nosniff"
         X-Frame-Options "SAMEORIGIN"
         X-XSS-Protection "1; mode=block"
+    }
+
+    # API трафік йде на бекенд (порт 8000 всередині Docker мережі)
+    handle /api/* {
+        reverse_proxy api:8000
+    }
+
+    # Health check бекенду — для зовнішнього моніторингу (Uptime Robot, etc.)
+    handle /health {
+        reverse_proxy api:8000
+    }
+
+    # Усі інші запити йдуть на React фронтенд
+    handle {
+        reverse_proxy frontend:80
     }
 }
