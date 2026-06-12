@@ -67,11 +67,13 @@ graph TD
 
 | Feature | Description |
 | --- | --- |
+| 🛡️ **Pydantic Injection Shield** | The first line of defense. Blocks malicious prompt injection attempts, jailbreaks, and rule-override commands in <1ms at the FastAPI router level. |
 | 🤖 **AI Agent (Gemini)** | Autonomous communication with clients, extracting cargo details, ADR classes, and body types using strict Pydantic JSON schemas. |
-| 🛡️ **Data Privacy (Scrubber)** | Built-in Data Scrubber masks personal data (phone numbers, emails) before LLM ingestion, preventing privacy leaks. |
+| 🔒 **Data Privacy (Scrubber)** | Built-in Data Scrubber masks personal data (phone numbers, emails) and infrastructure secrets before LLM ingestion, preventing privacy leaks. |
+| 🧠 **Vertex AI RAG** | Integrates with GCP Agent Builder to query logistics compliance data (ADR rules, customs documents) and injects ground-truth context into the AI. |
 | ✋ **Human-in-the-Loop (HITL)** | If the AI detects a high-stress scenario or complex ADR requirement, it triggers an alert and halts autonomy for human intervention. |
 | 🔐 **Row-Level Security (RLS)** | Multi-tenant architecture. Dispatchers can only access data belonging to their specific organization at the database kernel level. |
-| 📜 **Immutable Audit Trails** | All prompts, responses, and vault snapshots are immutably logged for B2B compliance and GDPR requirements. |
+| 📜 **Immutable Audit Trails** | All prompts, responses, and API calls are immutably logged to **GCP Cloud Logging** and PostgreSQL for B2B compliance and ISO 27001 requirements. |
 | ⚡ **Real-time Feedback** | Seamless, optimistic UI updates via TanStack Query and React. |
 
 ---
@@ -110,7 +112,8 @@ After the containers start successfully:
 - **Framework**: FastAPI (Asynchronous)
 - **Database**: PostgreSQL with Row-Level Security (RLS)
 - **ORM**: SQLAlchemy (Async) + Alembic for migrations
-- **AI Integration**: Google GenAI SDK (Gemini 3.1 Flash Lite)
+- **AI Integration**: Google GenAI SDK (Gemini 3.1 Flash Lite) + Vertex AI Agent Builder (RAG)
+- **Security & Audit**: Pydantic Validation, GCP Cloud Logging, InfraScrubber
 - **Authentication**: JWT (PyJWT), Passlib (Bcrypt)
 
 ### Frontend
