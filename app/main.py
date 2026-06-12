@@ -20,6 +20,7 @@ from app.core.telemetry import setup_telemetry
 from app.db.database import engine
 from app.db.models import Base
 from app.security.rate_limiter import limiter
+from app.security.cloud_audit import cloud_audit_middleware
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -60,6 +61,9 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept"],
 )
+
+# Незмінний Cloud Logging аудит (доповнює PostgreSQL ImmutableAuditLog)
+app.middleware("http")(cloud_audit_middleware)
 
 app.include_router(auth_router)
 app.include_router(chat_router)

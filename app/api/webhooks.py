@@ -8,6 +8,7 @@ from app.api.chat import process_secure_message
 from app.db.database import AsyncSessionLocal
 from app.db.models import ApiKey
 from app.schemas.chat import IncomingMessage
+from app.security.injection_shield import validate_against_injection
 
 router = APIRouter(prefix="/api/v1/webhooks", tags=["Webhooks"])
 
@@ -47,6 +48,9 @@ async def telegram_webhook(
         )
         
         try:
+            # Step 0: Prompt Injection Shield for Telegram input
+            validate_against_injection(driver_text)
+
             # Знаходимо org_id за допомогою дефолтного ключа
             async with AsyncSessionLocal() as session:
                 query = select(ApiKey).where(ApiKey.key == DEFAULT_TENANT_API_KEY)

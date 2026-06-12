@@ -9,6 +9,7 @@ from app.db.models import CargoOrder, ImmutableAuditLog, OrganizationSetting
 from app.schemas.chat import ChatResponse, IncomingMessage
 from app.security.auth import get_organization_from_api_key
 from app.security.rate_limiter import limiter
+from app.security.injection_shield import validate_against_injection
 from app.security.scrubber import DataScrubber
 from app.services.gemini_service import GeminiDispatcherService
 
@@ -41,6 +42,9 @@ async def process_secure_message(
             prompt_res = await session.execute(prompt_query)
             org_setting = prompt_res.scalar_one_or_none()
             custom_prompt = org_setting.system_prompt if org_setting else None
+
+        # Step 0: Prompt Injection Shield (blocks malicious prompts before any processing)
+        validate_against_injection(payload.text)
 
         # Step 1: Local Data Scrubbing (Security barrier entry)
         scrubbed = DataScrubber.anonymize(payload.text)

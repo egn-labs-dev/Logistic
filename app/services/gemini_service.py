@@ -7,6 +7,7 @@ from google.genai import types
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.schemas.dispatcher import DispatcherLLMOutput, ExtractedCargoDetails
+from app.services.rag_service import query_logistics_knowledge
 
 
 class GeminiDispatcherService:
@@ -32,6 +33,14 @@ class GeminiDispatcherService:
         if custom_prompt:
             system_instruction += f"\nCUSTOM ORGANIZATION RULES (CRITICAL, MUST FOLLOW):\n{custom_prompt}\n"
             
+        # RAG enrichment: підтягуємо релевантний контекст з бази знань
+        rag_context = await query_logistics_knowledge(clean_text)
+        if rag_context:
+            system_instruction += (
+                f"\n\nRELEVANT KNOWLEDGE BASE CONTEXT (use this as ground truth):\n"
+                f"{rag_context}\n"
+            )
+
         system_instruction += f"\nOUTPUT FORMAT: You MUST return a valid JSON object matching this JSON Schema:\n{json.dumps(DispatcherLLMOutput.model_json_schema())}\n"
 
         user_content = f"<user_input>\n{clean_text}\n</user_input>"
