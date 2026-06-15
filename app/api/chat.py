@@ -12,6 +12,7 @@ from app.security.rate_limiter import limiter
 from app.security.injection_shield import validate_against_injection
 from app.security.scrubber import DataScrubber
 from app.services.gemini_service import GeminiDispatcherService
+from app.api.websockets import ws_manager
 
 router = APIRouter(prefix="/api/v1", tags=["Secure Chat Engine"])
 gemini_service = GeminiDispatcherService()
@@ -43,29 +44,50 @@ async def process_secure_message(
             org_setting = prompt_res.scalar_one_or_none()
             custom_prompt = org_setting.system_prompt if org_setting else None
 
-        # Step 0: Prompt Injection Shield (blocks malicious prompts before any processing)
-        validate_against_injection(payload.text)
+        # Security and LLM Processing Block
+        is_security_violation = False
+        final_response_text = ""
+        order_status = "active_chat"
+        extracted_data_dump = "{}"
+        clean_text_for_audit = payload.text
+        vault_snapshot_for_audit = {}
 
-        # Step 1: Local Data Scrubbing (Security barrier entry)
-        scrubbed = DataScrubber.anonymize(payload.text)
-        
-        # Step 2: Pass scrubbed text to Gemini
-        llm_output = await gemini_service.analyze_dispatched_text(scrubbed.clean_text, custom_prompt)
-        
-        # Step 3: Asynchronous database writing protected by RLS
-        async with get_db_session_with_rls(organization_id) as session:
+        try:
+            # Step 0: Prompt Injection Shield
+            validate_against_injection(payload.text)
+
+            # Step 1: Local Data Scrubbing
+            scrubbed = DataScrubber.anonymize(payload.text)
+            clean_text_for_audit = scrubbed.clean_text
+            vault_snapshot_for_audit = scrubbed.vault
             
-            # Determine final status based on Gemini's verdict
+            # Step 2: Pass scrubbed text to Gemini
+            llm_output = await gemini_service.analyze_dispatched_text(scrubbed.clean_text, custom_prompt)
+            
             if llm_output.requires_human_intervention:
                 order_status = "human_required"
             else:
                 order_status = "qualified_lead" if llm_output.is_qualified_lead else "active_chat"
+                
+            extracted_data_dump = llm_output.extracted_data.model_dump_json()
+            final_response_text = DataScrubber.deanonymize(llm_output.response_to_user, scrubbed.vault)
             
+        except HTTPException as he:
+            if he.status_code == 400:
+                is_security_violation = True
+                order_status = "human_required"
+                final_response_text = "🚨 [Security System] Спроба маніпуляції заблокована. Запит відхилено."
+                extracted_data_dump = json.dumps({"error": "Prompt Injection Detected", "raw_input": payload.text})
+            else:
+                raise he
+
+        # Step 3: Asynchronous database writing protected by RLS
+        async with get_db_session_with_rls(organization_id) as session:
             # Save structured data to CargoOrder
             new_order = CargoOrder(
                 organization_id=organization_id,
                 session_id=payload.session_id,
-                cargo_details=json.loads(llm_output.extracted_data.model_dump_json()),
+                cargo_details=json.loads(extracted_data_dump),
                 status=order_status
             )
             session.add(new_order)
@@ -74,15 +96,27 @@ async def process_secure_message(
             audit_entry = ImmutableAuditLog(
                 organization_id=organization_id,
                 session_id=payload.session_id,
-                clean_prompt=scrubbed.clean_text,
-                clean_response=llm_output.response_to_user,
-                vault_snapshot=scrubbed.vault
+                clean_prompt=clean_text_for_audit if not is_security_violation else "BLOCKED: Prompt Injection",
+                clean_response=final_response_text,
+                vault_snapshot=vault_snapshot_for_audit
             )
             session.add(audit_entry)
 
-        # Step 4: Deanonymize generated response before sending it to the client
-        final_response_text = DataScrubber.deanonymize(llm_output.response_to_user, scrubbed.vault)
-        
+        # [НОВИЙ КОД] Відправляємо Push-сповіщення диспетчерам
+        if order_status == "human_required":
+            await ws_manager.broadcast_to_org(
+                organization_id,
+                {
+                    "type": "NEW_ALERT",
+                    "payload": {
+                        "session_id": payload.session_id,
+                        "status": order_status,
+                        "driver_id": payload.session_id,
+                        "message_preview": payload.text[:50] + "..."
+                    }
+                }
+            )
+
         return ChatResponse(
             session_id=payload.session_id,
             response_text=final_response_text

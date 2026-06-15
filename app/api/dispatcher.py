@@ -11,6 +11,7 @@ from app.security.auth import (TokenData, get_current_user_token_data,
                                require_dispatcher_role)
 from app.security.scrubber import DataScrubber
 from app.services.billing import report_successful_lead_to_stripe
+from app.api.websockets import ws_manager
 
 router = APIRouter(prefix="/api/v1/dispatcher", tags=["Dispatcher Console (HITL)"])
 
@@ -27,7 +28,7 @@ async def get_alerts_for_human(current_user: TokenData = Depends(require_dispatc
         query = select(CargoOrder).where(CargoOrder.status.in_(["human_required", "human_controlled"]))
         result = await session.execute(query)
         orders = result.scalars().all()
-        return [{"id": str(o.id), "session_id": o.session_id, "status": o.status} for o in orders]
+        return [{"id": str(o.id), "session_id": o.session_id, "status": o.status, "cargo_details": o.cargo_details} for o in orders]
 
 @router.post("/intercept", status_code=status.HTTP_200_OK)
 async def intercept_chat(payload: InterceptPayload, current_user: TokenData = Depends(require_dispatcher_role)):
@@ -39,7 +40,20 @@ async def intercept_chat(payload: InterceptPayload, current_user: TokenData = De
             .values(status="human_controlled")
         )
         await session.execute(query)
-        return {"status": "success", "message": f"Chat {payload.session_id} securely transferred to human."}
+        
+    # [НОВИЙ КОД] Сповіщаємо всіх, що чат перехоплено
+    await ws_manager.broadcast_to_org(
+        current_user.organization_id,
+        {
+            "type": "STATUS_UPDATE",
+            "payload": {
+                "session_id": payload.session_id,
+                "status": "human_controlled"
+            }
+        }
+    )
+    
+    return {"status": "success", "message": f"Chat {payload.session_id} securely transferred to human."}
 
 @router.get("/history/{session_id}", status_code=status.HTTP_200_OK)
 async def get_chat_history(session_id: str, current_user: TokenData = Depends(require_dispatcher_role)):
@@ -187,5 +201,17 @@ async def resolve_incident(
     # Реєстрація платіжної події (Тільки для успішних угод!)
     if payload.resolution_status == "resolved_won":
         background_tasks.add_task(report_successful_lead_to_stripe, tenant_id, payload.session_id)
+        
+    # [НОВИЙ КОД] Сповіщаємо всіх, що інцидент закрито
+    await ws_manager.broadcast_to_org(
+        tenant_id,
+        {
+            "type": "STATUS_UPDATE",
+            "payload": {
+                "session_id": payload.session_id,
+                "status": payload.resolution_status
+            }
+        }
+    )
     
     return {"detail": f"Session resolved as {payload.resolution_status}"}
