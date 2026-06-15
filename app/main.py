@@ -15,6 +15,7 @@ from app.api.dispatcher import router as dispatcher_router
 from app.api.settings import router as settings_router
 from app.api.waitlist import router as waitlist_router
 from app.api.webhooks import router as webhooks_router
+from app.api import websockets
 from app.core.config import settings
 from app.core.telemetry import setup_telemetry
 from app.db.database import engine
@@ -71,6 +72,7 @@ app.include_router(dispatcher_router)
 app.include_router(settings_router)
 app.include_router(webhooks_router)
 app.include_router(waitlist_router, prefix="/api/v1/waitlist", tags=["Waitlist CRM"])
+app.include_router(websockets.router, prefix="/ws/alerts", tags=["WebSockets"])
 
 setup_telemetry(app)
 
