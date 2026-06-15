@@ -45,7 +45,7 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl bg-slate-950 border-slate-800 text-slate-200 flex flex-col max-h-[90vh]">
+      <DialogContent className="max-w-2xl bg-slate-950/95 backdrop-blur-2xl border-slate-800/60 shadow-2xl text-slate-200 flex flex-col max-h-[90vh] animate-fade-in">
         <DialogHeader>
           <DialogTitle className="text-xl text-slate-100 flex items-center justify-between pr-6">
             <span>
@@ -131,13 +131,13 @@ export const ChatHistoryModal = ({ sessionId, isOpen, onClose, isHumanControlled
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder={t('chat.type_message')}
-                className="bg-slate-900 border-slate-700 text-slate-200 focus-visible:ring-blue-500"
+                className="bg-slate-900/50 border-slate-800 text-slate-200 focus-visible:ring-indigo-500/30"
                 disabled={sendMessageMutation.isPending}
               />
               <Button 
                 type="submit" 
                 disabled={sendMessageMutation.isPending || !message.trim()}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 transition-colors shadow-lg shadow-indigo-500/20"
               >
                 {sendMessageMutation.isPending ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

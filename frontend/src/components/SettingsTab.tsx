@@ -155,7 +155,7 @@ export const SettingsTab = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* Profile & Security Card */}
-        <Card className="bg-[#09090b]/80 border-slate-800/60 backdrop-blur-md shadow-xl relative overflow-hidden">
+        <Card className="bg-slate-950/40 border-slate-800/40 backdrop-blur-md shadow-lg relative overflow-hidden">
           <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
           <CardHeader>
             <CardTitle className="flex items-center text-slate-100">
@@ -195,7 +195,7 @@ export const SettingsTab = () => {
                   type="password" 
                   value={passwordData.oldPassword}
                   onChange={(e) => setPasswordData({...passwordData, oldPassword: e.target.value})}
-                  className="bg-slate-900 border-slate-800 text-slate-200" 
+                    className="bg-slate-900/50 border-slate-800 text-slate-200 focus-visible:ring-indigo-500/30" 
                   required
                 />
               </div>
@@ -207,7 +207,7 @@ export const SettingsTab = () => {
                     type="password" 
                     value={passwordData.newPassword}
                     onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                    className="bg-slate-900 border-slate-800 text-slate-200" 
+                      className="bg-slate-900/50 border-slate-800 text-slate-200 focus-visible:ring-indigo-500/30" 
                     required
                   />
                 </div>
@@ -218,7 +218,7 @@ export const SettingsTab = () => {
                     type="password" 
                     value={passwordData.confirmPassword}
                     onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                    className="bg-slate-900 border-slate-800 text-slate-200" 
+                      className="bg-slate-900/50 border-slate-800 text-slate-200 focus-visible:ring-indigo-500/30" 
                     required
                   />
                 </div>
@@ -234,7 +234,7 @@ export const SettingsTab = () => {
 
         <div className="space-y-6">
           
-          <Card className="bg-[#09090b]/80 border-slate-800/60 backdrop-blur-md shadow-xl opacity-100 transition-opacity">
+          <Card className="bg-slate-950/40 border-slate-800/40 backdrop-blur-md shadow-lg opacity-100 transition-opacity">
             <CardHeader>
               <CardTitle className="flex items-center text-slate-100">
                 <KeyRound className="w-5 h-5 mr-2 text-emerald-400" />
@@ -284,7 +284,7 @@ export const SettingsTab = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-[#09090b]/80 border-slate-800/60 backdrop-blur-md shadow-xl opacity-100 transition-opacity">
+          <Card className="bg-slate-950/40 border-slate-800/40 backdrop-blur-md shadow-lg opacity-100 transition-opacity">
             <CardHeader>
               <CardTitle className="flex items-center text-slate-100">
                 <Bot className="w-5 h-5 mr-2 text-amber-400" />
@@ -310,7 +310,7 @@ export const SettingsTab = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-[#09090b]/80 border-slate-800/60 backdrop-blur-md shadow-xl opacity-100 transition-opacity">
+          <Card className="bg-slate-950/40 border-slate-800/40 backdrop-blur-md shadow-lg opacity-100 transition-opacity">
             <CardHeader>
               <CardTitle className="flex items-center text-slate-100">
                 <div className="p-1.5 bg-blue-500/10 rounded-md mr-2">
@@ -333,7 +333,7 @@ export const SettingsTab = () => {
                     value={botToken}
                     onChange={(e) => setBotToken(e.target.value)}
                     placeholder="123456789:ABCdefGhIJKlmNoPQRsTuvwXyz"
-                    className="w-full bg-slate-900 border-slate-800 text-slate-200 pl-10 font-mono text-sm"
+                    className="w-full bg-slate-900/50 border-slate-800 text-slate-200 pl-10 font-mono text-sm focus-visible:ring-indigo-500/30"
                   />
                 </div>
                 

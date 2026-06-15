@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="uk" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AXIS Logistics Platform - Enterprise Pitch Deck</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5' }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'fade-in-up': 'fadeInUp 1s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { background-color: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .glass-card { background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(16px); border: 1px solid rgba(51, 65, 85, 0.5); }
+        .glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, rgba(0,0,0,0) 70%); border-radius: 50%; pointer-events: none; z-index: -1; }
+        .glow-top-right { top: -200px; right: -200px; }
+        .glow-bottom-left { bottom: -200px; left: -200px; }
+        .reveal-on-scroll { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal-on-scroll.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-500 selection:text-white relative">
+    
+    <div class="glow glow-top-right"></div>
+    <div class="glow glow-bottom-left" style="background: radial-gradient(circle, rgba(56,189,248,0.1) 0%, rgba(0,0,0,0) 70%);"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-card border-b-0 border-slate-800/80 top-0">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-6 h-6 text-brand-400"></i>
+                <span class="font-bold text-xl tracking-tight text-white">AXIS</span>
+            </div>
+            <div class="hidden md:flex gap-8 text-sm font-medium text-slate-300">
+                <a href="#problem" class="hover:text-white transition-colors">Проблема</a>
+                <a href="#solution" class="hover:text-white transition-colors">Рішення</a>
+                <a href="#architecture" class="hover:text-white transition-colors">Архітектура</a>
+                <a href="#security" class="hover:text-white transition-colors">Безпека</a>
+            </div>
+            <a href="#contact" class="bg-brand-600 hover:bg-brand-500 text-white px-5 py-2 rounded-full text-sm font-medium transition-all shadow-lg shadow-brand-500/25">
+                Замовити Демо
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden flex flex-col items-center text-center px-6 min-h-screen justify-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700/50 text-slate-300 text-xs font-medium mb-8 animate-fade-in-up" style="animation-delay: 0.1s">
+            <span class="flex h-2 w-2 rounded-full bg-emerald-500"></span>
+            Використовується в Production
+        </div>
+        
+        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 max-w-5xl leading-tight animate-fade-in-up" style="animation-delay: 0.2s">
+            Автономна нервова система <br/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-cyan-400">вашої логістики</span>
+        </h1>
+        
+        <p class="text-lg md:text-xl text-slate-400 max-w-2xl mb-10 animate-fade-in-up" style="animation-delay: 0.3s">
+            AXIS поєднує можливості Google AI, архітектуру Zero Trust та миттєву обробку даних. Платформа створена для масштабування B2B компаній з 1000+ клієнтами без розширення штату.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style="animation-delay: 0.4s">
+            <a href="#architecture" class="bg-slate-100 hover:bg-white text-slate-900 px-8 py-3.5 rounded-full font-semibold transition-all flex items-center justify-center gap-2">
+                Дивитись архітектуру <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+            <a href="#problem" class="glass-card hover:bg-slate-800/60 text-white px-8 py-3.5 rounded-full font-semibold transition-all">
+                Як це працює
+            </a>
+        </div>
+
+        <!-- Metric badges -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-20 max-w-4xl w-full animate-fade-in-up" style="animation-delay: 0.6s">
+            <div class="glass-card rounded-2xl p-4 flex flex-col items-center">
+                <div class="text-3xl font-bold text-white mb-1">&lt; 2с</div>
+                <div class="text-xs text-slate-400 uppercase tracking-wide">Швидкість обробки</div>
+            </div>
+            <div class="glass-card rounded-2xl p-4 flex flex-col items-center">
+                <div class="text-3xl font-bold text-white mb-1">99.9%</div>
+                <div class="text-xs text-slate-400 uppercase tracking-wide">Точність AI парсингу</div>
+            </div>
+            <div class="glass-card rounded-2xl p-4 flex flex-col items-center">
+                <div class="text-3xl font-bold text-white mb-1">1000+</div>
+                <div class="text-xs text-slate-400 uppercase tracking-wide">Клієнтів на ноду</div>
+            </div>
+            <div class="glass-card rounded-2xl p-4 flex flex-col items-center">
+                <div class="text-3xl font-bold text-white mb-1">Zero</div>
+                <div class="text-xs text-slate-400 uppercase tracking-wide">Trust Security</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section id="problem" class="py-24 px-6 relative bg-slate-900/20">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 reveal-on-scroll">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Ера ручної диспетчеризації <span class="text-red-400">завершена</span></h2>
+                <p class="text-slate-400 max-w-2xl mx-auto">Класичні TMS системи та месенджери створюють "вузькі місця", які унеможливлюють швидке зростання бізнесу.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-card rounded-2xl p-8 reveal-on-scroll" style="transition-delay: 0.1s">
+                    <div class="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center mb-6">
+                        <i data-lucide="keyboard" class="w-6 h-6 text-red-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Високе когнітивне навантаження</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Диспетчер змушений читати десятки чатів у Telegram/Viber, виокремлювати маршрути, вагу та вручну переносити їх в 1С. Це призводить до вигорання та помилок.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-8 reveal-on-scroll" style="transition-delay: 0.2s">
+                    <div class="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center mb-6">
+                        <i data-lucide="shield-alert" class="w-6 h-6 text-amber-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Вразливість до атак</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Стандартні боти пропускають Prompt Injections. Зловмисники можуть змусити бота "злити" базу клієнтів або виконати несанкціоновані команди.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-8 reveal-on-scroll" style="transition-delay: 0.3s">
+                    <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6">
+                        <i data-lucide="database" class="w-6 h-6 text-blue-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Технологічний борг</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Монолітні архітектури не витримують різкого зростання кількості клієнтів. Polling бази даних кожні 5 секунд "кладе" сервери під навантаженням.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution / Architecture -->
+    <section id="architecture" class="py-24 px-6 relative">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col lg:flex-row gap-16 items-center">
+                <div class="lg:w-1/2 reveal-on-scroll">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">Мікросервісна <br/><span class="text-brand-400">Архітектура Майбутнього</span></h2>
+                    <p class="text-slate-400 mb-8 text-lg">
+                        Ми побудували AXIS за стандартами Big Tech. Асинхронний бекенд на FastAPI забезпечує феноменальну пропускну здатність, а WebSockets миттєво доставляють дані без перевантаження бази.
+                    </p>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400 shrink-0"></i>
+                            <div>
+                                <strong class="text-white">FastAPI & AsyncIO</strong>
+                                <p class="text-slate-400 text-sm mt-1">Повністю неблокуючий I/O (включно з Vertex AI SDK) для максимальної швидкості.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400 shrink-0"></i>
+                            <div>
+                                <strong class="text-white">Мультитенантність (RLS)</strong>
+                                <p class="text-slate-400 text-sm mt-1">PostgreSQL Row-Level Security гарантує, що клієнт A ніколи не побачить дані клієнта B.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400 shrink-0"></i>
+                            <div>
+                                <strong class="text-white">Event-Driven UI</strong>
+                                <p class="text-slate-400 text-sm mt-1">React дашборд оновлюється автоматично через WebSockets, без жодного кліка "Оновити".</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="lg:w-1/2 w-full glass-card rounded-2xl p-6 reveal-on-scroll">
+                    <!-- Mermaid Schema -->
+                    <div class="mermaid rounded-xl overflow-hidden bg-slate-900/50 p-4">
+graph TD
+    subgraph "Клієнтський Рівень"
+        T[B2B Telegram]
+        W[Web Дашборд]
+    end
+
+    subgraph "AXIS Core (FastAPI)"
+        SM[Security Middleware]
+        WS[WebSocket Manager]
+        AI[AI NLP Engine]
+    end
+
+    subgraph "Сховища"
+        PG[(PostgreSQL)]
+        V[(HashiCorp Vault)]
+        R[(Redis)]
+    end
+
+    T -->|Webhooks| SM
+    W <-->|WSS| WS
+    SM -->|Check| V
+    SM -->|Parse| AI
+    AI --> PG
+    WS --> R
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Flow Section -->
+    <section class="py-24 px-6 relative bg-slate-900/20">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 reveal-on-scroll">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Життєвий цикл <span class="text-cyan-400">заявки (Data Flow)</span></h2>
+                <p class="text-slate-400 max-w-2xl mx-auto">Як саме AXIS автоматизує роботу, перетворюючи сирий текст водія у структурований JSON за 2 секунди.</p>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6 md:p-10 reveal-on-scroll">
+                <div class="mermaid text-center">
+sequenceDiagram
+    participant Driver as Водій (Telegram)
+    participant Sec as Security Layer
+    participant Gemini as Google AI
+    participant DB as PostgreSQL
+    participant UI as Дашборд Диспетчера
+
+    Driver->>Sec: "Київ-Львів, 20т заморозка"
+    activate Sec
+    Sec->>Sec: Anti-Prompt Injection Check
+    Sec->>Gemini: Асинхронний парсинг
+    activate Gemini
+    Gemini-->>Sec: JSON Payload
+    deactivate Gemini
+    Sec->>DB: Збереження (RLS)
+    Sec->>UI: WebSocket Push Event
+    deactivate Sec
+    UI-->>Driver: "Ваша заявка прийнята!"
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security Section -->
+    <section id="security" class="py-24 px-6 relative">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 mb-6 reveal-on-scroll">
+                <i data-lucide="shield" class="w-8 h-8 text-emerald-400"></i>
+            </div>
+            <h2 class="text-3xl md:text-4xl font-bold mb-6 reveal-on-scroll">Zero Trust Security</h2>
+            <p class="text-slate-400 max-w-3xl mx-auto mb-16 text-lg reveal-on-scroll">
+                Ми не довіряємо жодному пакету даних. Інфраструктура захищена на рівні мережі, бази даних та AI-обробки.
+            </p>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+                <div class="glass-card rounded-2xl p-6 reveal-on-scroll" style="transition-delay: 0.1s">
+                    <h4 class="font-bold text-white mb-2 flex items-center gap-2"><i data-lucide="key" class="w-4 h-4 text-brand-400"></i> HashiCorp Vault</h4>
+                    <p class="text-sm text-slate-400">Усі API-ключі та токени зберігаються в ізольованому Vault-сховищі. Вони недоступні у вихідному коді або ENV-файлах.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 reveal-on-scroll" style="transition-delay: 0.2s">
+                    <h4 class="font-bold text-white mb-2 flex items-center gap-2"><i data-lucide="filter" class="w-4 h-4 text-brand-400"></i> LLM Firewall</h4>
+                    <p class="text-sm text-slate-400">Суворий системний промпт Google Gemini відфільтровує спроби ін'єкцій та повертає безпечний JSON-відповідь.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 reveal-on-scroll" style="transition-delay: 0.3s">
+                    <h4 class="font-bold text-white mb-2 flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4 text-brand-400"></i> RLS Policies</h4>
+                    <p class="text-sm text-slate-400">PostgreSQL політики (Row-Level Security) гарантують, що B2B-клієнт фізично не може зчитати рядки БД іншого клієнта.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 reveal-on-scroll" style="transition-delay: 0.4s">
+                    <h4 class="font-bold text-white mb-2 flex items-center gap-2"><i data-lucide="eye-off" class="w-4 h-4 text-brand-400"></i> JWT & Cookie</h4>
+                    <p class="text-sm text-slate-400">Захищені HttpOnly куки та короткоживучі JWT токени (у поєднанні з WebSockets auth-хендшейками).</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer CTA -->
+    <section id="contact" class="py-24 px-6 relative border-t border-slate-800/60 bg-slate-900/50">
+        <div class="max-w-4xl mx-auto text-center reveal-on-scroll">
+            <h2 class="text-3xl md:text-5xl font-bold mb-6">Готові масштабувати логістику?</h2>
+            <p class="text-slate-400 mb-10 text-lg">Запустіть AXIS Enterprise Platform у вашій компанії вже сьогодні.</p>
+            <button class="bg-white hover:bg-slate-200 text-slate-900 px-10 py-4 rounded-full font-bold text-lg transition-all shadow-xl shadow-white/10 hover:shadow-white/20 hover:-translate-y-1">
+                Розгорнути Node для Демо
+            </button>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'dark',
+            fontFamily: 'Inter',
+            themeVariables: {
+                darkMode: true,
+                background: '#0f172a',
+                primaryColor: '#4f46e5',
+                primaryTextColor: '#f8fafc',
+                primaryBorderColor: '#334155',
+                lineColor: '#64748b',
+                secondaryColor: '#1e293b',
+                tertiaryColor: '#020617'
+            }
+        });
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal-on-scroll').forEach((el) => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

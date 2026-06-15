@@ -8,7 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { 
   LogOut, ShieldAlert, Loader2, History, Activity, 
-  BrainCircuit, Clock, Wallet, LayoutDashboard, Settings, BellRing, MessageSquareWarning
+  BrainCircuit, Clock, Wallet, LayoutDashboard, Settings, BellRing, MessageSquareWarning,
+  MapPin, Truck, Weight, ThermometerSnowflake, FileJson
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ChatHistoryModal } from '@/components/ChatHistoryModal';
@@ -63,10 +64,10 @@ export const Dashboard = () => {
   }, [alerts, previousAlertCount, t]);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#09090b] text-slate-100 font-sans selection:bg-indigo-500/30">
+    <div className="flex h-screen w-full overflow-hidden bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500/30">
       
       {/* SIDEBAR */}
-      <aside className="hidden md:flex w-64 flex-col border-r border-slate-800/60 bg-[#09090b]/80 backdrop-blur-xl z-20">
+      <aside className="hidden md:flex w-64 flex-col border-r border-slate-800/40 bg-slate-950/50 backdrop-blur-2xl z-20 shadow-2xl">
         <div className="flex h-16 items-center px-6 border-b border-slate-800/60">
           <div className="bg-indigo-600/20 p-1.5 rounded-lg mr-3 shadow-[0_0_15px_rgba(79,70,229,0.3)]">
             <ShieldAlert className="w-5 h-5 text-indigo-400" />
@@ -176,7 +177,7 @@ export const Dashboard = () => {
             
             {/* KPI GRID */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="bg-slate-900/40 border-slate-800/50 hover:bg-slate-900/70 transition-colors duration-200 shadow-sm group">
+              <Card className="bg-slate-950/40 border-slate-800/40 backdrop-blur-md hover:bg-slate-900/60 transition-all duration-300 shadow-lg hover:shadow-indigo-500/5 group">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">{t('dashboard.kpi.autonomy_rate')}</span>
@@ -193,7 +194,7 @@ export const Dashboard = () => {
                 </CardContent>
               </Card>
               
-              <Card className="bg-slate-900/40 border-slate-800/50 hover:bg-slate-900/70 transition-colors duration-200 shadow-sm group">
+              <Card className="bg-slate-950/40 border-slate-800/40 backdrop-blur-md hover:bg-slate-900/60 transition-all duration-300 shadow-lg hover:shadow-indigo-500/5 group">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">{t('dashboard.kpi.response_time')}</span>
@@ -208,7 +209,7 @@ export const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-slate-900/40 border-slate-800/50 hover:bg-slate-900/70 transition-colors duration-200 shadow-sm group">
+              <Card className="bg-slate-950/40 border-slate-800/40 backdrop-blur-md hover:bg-slate-900/60 transition-all duration-300 shadow-lg hover:shadow-indigo-500/5 group">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">{t('dashboard.kpi.active_incidents')}</span>
@@ -226,7 +227,7 @@ export const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-slate-900/40 border-slate-800/50 hover:bg-slate-900/70 transition-colors duration-200 shadow-sm group">
+              <Card className="bg-slate-950/40 border-slate-800/40 backdrop-blur-md hover:bg-slate-900/60 transition-all duration-300 shadow-lg hover:shadow-indigo-500/5 group">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">{t('dashboard.kpi.savings')}</span>
@@ -248,8 +249,8 @@ export const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
               {/* Analytics Chart (Takes 2 columns) */}
-              <Card className="lg:col-span-2 bg-slate-900/40 border-slate-800/50 flex flex-col shadow-sm">
-                <div className="p-5 border-b border-slate-800/40 flex justify-between items-center">
+              <Card className="lg:col-span-2 bg-slate-950/40 border-slate-800/40 backdrop-blur-md flex flex-col shadow-lg">
+                <div className="p-5 border-b border-slate-800/40 flex justify-between items-center bg-slate-900/20">
                   <div>
                     <h3 className="font-semibold text-slate-100">{t('dashboard.chart.title')}</h3>
                     <p className="text-xs text-slate-400 mt-1">{t('dashboard.chart.subtitle')}</p>
@@ -281,7 +282,7 @@ export const Dashboard = () => {
               </Card>
 
               {/* Live Alerts Feed (Takes 1 column) */}
-              <Card className="bg-slate-900/40 border-slate-800/50 flex flex-col shadow-sm overflow-hidden">
+              <Card className="bg-slate-950/40 border-slate-800/40 backdrop-blur-md flex flex-col shadow-lg overflow-hidden relative">
                 <div className="p-5 border-b border-slate-800/40 flex justify-between items-center bg-slate-900/30">
                   <div className="flex items-center">
                     <div className="relative flex h-2 w-2 mr-3">
@@ -315,10 +316,10 @@ export const Dashboard = () => {
                         <div 
                           key={alert.id} 
                           className={cn(
-                            "p-4 rounded-xl border transition-all duration-200",
+                            "p-4 rounded-xl border transition-all duration-300 animate-slide-up",
                             isControlled 
-                              ? "bg-slate-900/40 border-indigo-500/20 hover:bg-slate-900/80 hover:border-indigo-500/40" 
-                              : "bg-slate-900/40 border-red-500/20 hover:bg-slate-900/80 hover:border-red-500/40"
+                              ? "bg-slate-900/30 border-indigo-500/20 hover:bg-slate-900/50 hover:border-indigo-500/40" 
+                              : "bg-slate-900/40 border-red-500/30 hover:bg-slate-900/80 hover:border-red-500/50 animate-pulse-glow"
                           )}
                         >
                           
@@ -416,18 +417,102 @@ export const Dashboard = () => {
                            </Button>
                          </div>
                          
-                         {/* Відображення згенерованої JSON бази даних */}
+                         {/* Відображення деталей заявки */}
                          {alert.cargo_details && (
-                           <div className="bg-slate-950/50 rounded-lg p-4 border border-slate-800/50 overflow-x-auto w-full">
-                             <div className={cn(
-                               "text-xs font-semibold mb-3 uppercase tracking-wide flex items-center",
-                               isSecurityThreat ? "text-amber-500" : "text-emerald-500"
-                             )}>
-                               {isSecurityThreat ? "⚠️ ЗАГРОЗА БЕЗПЕЦІ (ПЕРЕХОПЛЕНО)" : "✓ ЗГЕНЕРОВАНА ЗАЯВКА (JSON)"}
-                             </div>
-                             <pre className="text-[12px] text-slate-400 font-mono whitespace-pre-wrap leading-relaxed">
-                               {JSON.stringify(alert.cargo_details, null, 2)}
-                             </pre>
+                           <div className="w-full">
+                             {isSecurityThreat ? (
+                               <div className="bg-amber-500/10 rounded-lg p-4 border border-amber-500/30 w-full flex flex-col shadow-sm">
+                                 <div className="text-xs font-semibold mb-4 uppercase tracking-wide flex items-center text-amber-500">
+                                   <ShieldAlert className="w-4 h-4 mr-1.5" /> ЗАГРОЗА БЕЗПЕЦІ (ПЕРЕХОПЛЕНО)
+                                 </div>
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                   <div className="bg-amber-950/40 rounded-md p-3 border border-amber-500/20">
+                                     <div className="text-[10px] text-amber-500/70 uppercase font-semibold mb-1">Тип загрози</div>
+                                     <div className="text-sm font-medium text-amber-400 flex items-center">
+                                       {alert.cargo_details.error || 'Невідома загроза'}
+                                     </div>
+                                   </div>
+                                   <div className="bg-amber-950/40 rounded-md p-3 border border-amber-500/20">
+                                     <div className="text-[10px] text-amber-500/70 uppercase font-semibold mb-1">Перехоплений текст (Payload)</div>
+                                     <div className="text-xs font-mono text-amber-400/80 italic break-words">
+                                       "{alert.cargo_details.raw_input || 'Немає даних'}"
+                                     </div>
+                                   </div>
+                                 </div>
+                               </div>
+                             ) : (
+                               <div className="flex flex-col space-y-4">
+                                 <div className="flex items-center justify-between">
+                                   <div className="text-xs font-semibold uppercase tracking-wide flex items-center text-emerald-500">
+                                     <FileJson className="w-4 h-4 mr-1.5" /> ДАНІ ГОТОВІ ДЛЯ TMS
+                                   </div>
+                                 </div>
+                                 
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                   {/* Route details */}
+                                   <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-800">
+                                     <div className="flex items-start">
+                                       <MapPin className="w-5 h-5 text-indigo-400 mt-0.5 mr-3 shrink-0" />
+                                       <div>
+                                         <div className="text-[10px] text-slate-500 uppercase font-semibold mb-1">Маршрут</div>
+                                         <div className="text-sm font-medium text-slate-200">
+                                           {alert.cargo_details.departure_city || 'Не вказано'} 
+                                           <span className="text-slate-600 mx-2">→</span> 
+                                           {alert.cargo_details.destination_city || 'Не вказано'}
+                                         </div>
+                                       </div>
+                                     </div>
+                                   </div>
+
+                                   {/* Cargo & Weight */}
+                                   <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-800 flex justify-between">
+                                     <div className="flex items-start">
+                                       <Truck className="w-5 h-5 text-blue-400 mt-0.5 mr-3 shrink-0" />
+                                       <div>
+                                         <div className="text-[10px] text-slate-500 uppercase font-semibold mb-1">Вантаж</div>
+                                         <div className="text-sm font-medium text-slate-200 capitalize">
+                                           {alert.cargo_details.cargo_type || 'Не вказано'}
+                                         </div>
+                                         {alert.cargo_details.body_type_required && (
+                                           <div className="text-xs text-slate-400 mt-1 capitalize">
+                                             Кузов: {alert.cargo_details.body_type_required}
+                                           </div>
+                                         )}
+                                       </div>
+                                     </div>
+                                     {alert.cargo_details.weight_tons && (
+                                       <div className="flex items-start border-l border-slate-800 pl-4 ml-2">
+                                         <div>
+                                           <div className="text-[10px] text-slate-500 uppercase font-semibold mb-1 text-right">Вага</div>
+                                           <div className="text-sm font-bold text-slate-200 flex items-center justify-end">
+                                             <Weight className="w-3.5 h-3.5 mr-1 text-slate-400" />
+                                             {alert.cargo_details.weight_tons} т
+                                           </div>
+                                         </div>
+                                       </div>
+                                     )}
+                                   </div>
+
+                                   {/* Temperature */}
+                                   {alert.cargo_details.temperature_control?.is_required && (
+                                     <div className="bg-blue-900/20 rounded-lg p-4 border border-blue-500/20 md:col-span-2">
+                                       <div className="flex items-center">
+                                         <div className="p-1.5 bg-blue-500/20 rounded-md mr-3">
+                                           <ThermometerSnowflake className="w-4 h-4 text-blue-400" />
+                                         </div>
+                                         <div>
+                                           <div className="text-[10px] text-blue-400/70 uppercase font-semibold">Температурний режим</div>
+                                           <div className="text-sm font-medium text-blue-300">
+                                             {alert.cargo_details.temperature_control.min_temp_celsius !== undefined ? `Від ${alert.cargo_details.temperature_control.min_temp_celsius}°C ` : ''}
+                                             {alert.cargo_details.temperature_control.max_temp_celsius !== undefined ? `до ${alert.cargo_details.temperature_control.max_temp_celsius}°C` : ''}
+                                           </div>
+                                         </div>
+                                       </div>
+                                     </div>
+                                   )}
+                                 </div>
+                               </div>
+                             )}
                            </div>
                          )}
                        </div>
