@@ -16,6 +16,8 @@ import { EfficiencyChart } from '@/components/EfficiencyChart';
 import { SettingsTab } from '@/components/SettingsTab';
 import { cn } from '@/lib/utils';
 
+import { ALERT_SOUND } from '@/assets/alertSound';
+
 export const Dashboard = () => {
   const { t } = useTranslation();
   const setToken = useAuthStore((state) => state.setToken);
@@ -30,14 +32,35 @@ export const Dashboard = () => {
     setToken(null);
   };
 
+  const [previousAlertCount, setPreviousAlertCount] = useState(0);
+
   useEffect(() => {
-    if (alerts && alerts.length > 0) {
-      toast.error(`${t('dashboard.live_feed.active')}: ${alerts.length}`, {
-        id: 'alerts-toast',
-      });
+    if (alerts) {
+      const activeIncidents = alerts.filter((a: any) => a.status === 'human_required').length;
+      
+      if (activeIncidents > previousAlertCount) {
+        // Play alert sound
+        try {
+          const audio = new Audio(ALERT_SOUND);
+          audio.volume = 0.5;
+          const playPromise = audio.play();
+          
+          if (playPromise !== undefined) {
+            playPromise.catch(error => {
+              console.log("Browser autoplay policy blocked the sound. User needs to interact with the page first.", error);
+            });
+          }
+        } catch (e) {
+          console.error("Audio playback failed", e);
+        }
+
+        toast.error(`${t('dashboard.live_feed.active')}: ${activeIncidents} (НОВИЙ ІНЦИДЕНТ!)`, {
+          id: 'alerts-toast-new',
+        });
+      }
+      setPreviousAlertCount(activeIncidents);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alerts?.length]);
+  }, [alerts, previousAlertCount, t]);
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#09090b] text-slate-100 font-sans selection:bg-indigo-500/30">
@@ -122,7 +145,7 @@ export const Dashboard = () => {
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 flex flex-col relative overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/15 via-[#09090b] to-[#09090b]">
+      <main className="flex-1 flex flex-col relative overflow-hidden bg-slate-950">
         
         {/* Top Navbar Mobile + Status */}
         <header className="h-16 flex items-center justify-between px-6 border-b border-slate-800/60 backdrop-blur-md sticky top-0 z-10">
@@ -153,7 +176,7 @@ export const Dashboard = () => {
             
             {/* KPI GRID */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="bg-[#09090b]/60 border-slate-800/60 backdrop-blur-sm hover:border-indigo-500/30 transition-all duration-300 hover:shadow-[0_0_20px_rgba(79,70,229,0.05)] group">
+              <Card className="bg-slate-900/40 border-slate-800/50 hover:bg-slate-900/70 transition-colors duration-200 shadow-sm group">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">{t('dashboard.kpi.autonomy_rate')}</span>
@@ -170,7 +193,7 @@ export const Dashboard = () => {
                 </CardContent>
               </Card>
               
-              <Card className="bg-[#09090b]/60 border-slate-800/60 backdrop-blur-sm hover:border-emerald-500/30 transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.05)] group">
+              <Card className="bg-slate-900/40 border-slate-800/50 hover:bg-slate-900/70 transition-colors duration-200 shadow-sm group">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">{t('dashboard.kpi.response_time')}</span>
@@ -185,7 +208,7 @@ export const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-[#09090b]/60 border-slate-800/60 backdrop-blur-sm hover:border-red-500/30 transition-all duration-300 hover:shadow-[0_0_20px_rgba(239,68,68,0.05)] group">
+              <Card className="bg-slate-900/40 border-slate-800/50 hover:bg-slate-900/70 transition-colors duration-200 shadow-sm group">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">{t('dashboard.kpi.active_incidents')}</span>
@@ -194,16 +217,16 @@ export const Dashboard = () => {
                     </div>
                   </div>
                   <div className="text-3xl font-bold text-white tracking-tight flex items-baseline gap-2">
-                    {isAlertsLoading ? <Loader2 className="w-6 h-6 animate-spin text-slate-600" /> : alerts?.filter((a: { status: string }) => a.status === 'human_required').length || 0}
-                    {alerts?.filter((a: { status: string }) => a.status === 'human_required').length > 0 && (
-                       <span className="text-xs font-normal text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20 animate-pulse">{t('dashboard.kpi.attention')}</span>
+                    {isAlertsLoading ? <Loader2 className="w-6 h-6 animate-spin text-slate-600" /> : (alerts?.filter((a: { status: string }) => a.status === 'human_required')?.length || 0)}
+                    {(alerts?.filter((a: { status: string }) => a.status === 'human_required')?.length || 0) > 0 && (
+                       <span className="text-xs font-normal text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20">{t('dashboard.kpi.attention')}</span>
                     )}
                   </div>
                   <div className="mt-2 text-xs text-slate-500">{t('dashboard.kpi.needs_intervention')}</div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-[#09090b]/60 border-slate-800/60 backdrop-blur-sm hover:border-amber-500/30 transition-all duration-300 hover:shadow-[0_0_20px_rgba(245,158,11,0.05)] group">
+              <Card className="bg-slate-900/40 border-slate-800/50 hover:bg-slate-900/70 transition-colors duration-200 shadow-sm group">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm font-medium text-slate-400 group-hover:text-slate-300 transition-colors">{t('dashboard.kpi.savings')}</span>
@@ -225,7 +248,7 @@ export const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
               {/* Analytics Chart (Takes 2 columns) */}
-              <Card className="lg:col-span-2 bg-[#09090b]/80 border-slate-800/60 backdrop-blur-md flex flex-col shadow-xl">
+              <Card className="lg:col-span-2 bg-slate-900/40 border-slate-800/50 flex flex-col shadow-sm">
                 <div className="p-5 border-b border-slate-800/40 flex justify-between items-center">
                   <div>
                     <h3 className="font-semibold text-slate-100">{t('dashboard.chart.title')}</h3>
@@ -233,11 +256,11 @@ export const Dashboard = () => {
                   </div>
                   <div className="flex items-center gap-4 text-xs font-medium">
                     <div className="flex items-center">
-                      <div className="w-2 h-2 rounded-full bg-blue-500 mr-2 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
+                      <div className="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
                       <span className="text-slate-300">{t('dashboard.chart.autonomous')}</span>
                     </div>
                     <div className="flex items-center">
-                      <div className="w-2 h-2 rounded-full bg-amber-500 mr-2 shadow-[0_0_8px_rgba(245,158,11,0.8)]"></div>
+                      <div className="w-2 h-2 rounded-full bg-amber-500 mr-2"></div>
                       <span className="text-slate-300">{t('dashboard.chart.dispatcher')}</span>
                     </div>
                   </div>
@@ -258,7 +281,7 @@ export const Dashboard = () => {
               </Card>
 
               {/* Live Alerts Feed (Takes 1 column) */}
-              <Card className="bg-[#09090b]/80 border-slate-800/60 backdrop-blur-md flex flex-col shadow-xl overflow-hidden">
+              <Card className="bg-slate-900/40 border-slate-800/50 flex flex-col shadow-sm overflow-hidden">
                 <div className="p-5 border-b border-slate-800/40 flex justify-between items-center bg-slate-900/30">
                   <div className="flex items-center">
                     <div className="relative flex h-2 w-2 mr-3">
@@ -292,21 +315,16 @@ export const Dashboard = () => {
                         <div 
                           key={alert.id} 
                           className={cn(
-                            "p-4 rounded-xl border relative overflow-hidden transition-all duration-300 group hover:shadow-lg",
+                            "p-4 rounded-xl border transition-all duration-200",
                             isControlled 
-                              ? "bg-indigo-950/20 border-indigo-900/50 hover:bg-indigo-900/30" 
-                              : "bg-red-950/20 border-red-900/50 hover:bg-red-900/30"
+                              ? "bg-slate-900/40 border-indigo-500/20 hover:bg-slate-900/80 hover:border-indigo-500/40" 
+                              : "bg-slate-900/40 border-red-500/20 hover:bg-slate-900/80 hover:border-red-500/40"
                           )}
                         >
-                          {/* Accent Gradient Border Effect */}
-                          <div className={cn(
-                            "absolute top-0 left-0 w-1 h-full",
-                            isControlled ? "bg-indigo-500" : "bg-red-500"
-                          )}></div>
                           
-                          <div className="pl-2">
+                          <div className="pl-1">
                             <div className="flex justify-between items-start mb-2">
-                              <span className="font-mono text-xs text-slate-300 truncate w-3/4">
+                              <span className="font-mono text-xs text-slate-400 truncate w-3/4">
                                 {alert.session_id}
                               </span>
                               <span className={cn(
@@ -327,7 +345,7 @@ export const Dashboard = () => {
                                   size="sm"
                                   onClick={() => interceptMutation.mutate(alert.session_id)}
                                   disabled={interceptMutation.isPending}
-                                  className="flex-1 bg-red-600/90 hover:bg-red-500 text-white h-8 text-xs font-medium shadow-[0_0_10px_rgba(220,38,38,0.3)] hover:shadow-[0_0_15px_rgba(220,38,38,0.5)] transition-all border border-red-500"
+                                  className="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 h-8 text-xs font-medium border border-red-500/20 transition-colors"
                                 >
                                   {interceptMutation.isPending && interceptMutation.variables === alert.session_id ? (
                                     <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
@@ -342,8 +360,8 @@ export const Dashboard = () => {
                                 className={cn(
                                   "h-8 text-xs font-medium transition-colors",
                                   isControlled 
-                                    ? "flex-1 bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.3)]" 
-                                    : "px-3 bg-slate-900/80 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+                                    ? "flex-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20" 
+                                    : "px-3 bg-slate-900/40 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
                                 )}
                               >
                                 {isControlled ? (
@@ -370,35 +388,56 @@ export const Dashboard = () => {
                <h2 className="text-2xl font-semibold mb-6 text-white">{t('dashboard.alerts_tab.title')}</h2>
                {alerts && alerts.length > 0 ? (
                  <div className="grid gap-4">
-                   {alerts.map((alert: { id: string, session_id: string, status: string }) => (
-                     <div key={alert.id} className="bg-slate-900/50 border border-slate-800 rounded-lg p-4 flex justify-between items-center hover:bg-slate-800/50 transition-colors">
-                       <div>
-                         <div className="font-mono text-sm text-slate-300 mb-1">{alert.session_id}</div>
-                         <div className="text-xs text-slate-500">
-                           Статус: <span className={cn(
-                             "font-semibold",
-                             alert.status === 'human_controlled' ? "text-indigo-400" : "text-red-400"
-                           )}>
-                             {alert.status === 'human_controlled' ? t('dashboard.live_feed.under_control') : t('dashboard.live_feed.sos')}
-                           </span>
+                   {alerts.map((alert: { id: string, session_id: string, status: string, cargo_details?: any }) => {
+                     const isSecurityThreat = alert.cargo_details && alert.cargo_details.error;
+                     
+                     return (
+                       <div key={alert.id} className="bg-slate-900/40 border border-slate-800/50 rounded-xl p-5 flex flex-col hover:bg-slate-900/60 transition-colors shadow-sm gap-4">
+                         <div className="flex justify-between items-center w-full border-b border-slate-800/30 pb-3">
+                           <div>
+                             <div className="font-mono text-sm text-slate-300 mb-1">{alert.session_id}</div>
+                             <div className="text-xs text-slate-500">
+                               Статус: <span className={cn(
+                                 "font-medium px-2 py-0.5 rounded-full ml-1",
+                                 alert.status === 'human_controlled' ? "bg-indigo-500/10 text-indigo-400" : "bg-red-500/10 text-red-400"
+                               )}>
+                                 {alert.status === 'human_controlled' ? t('dashboard.live_feed.under_control') : t('dashboard.live_feed.sos')}
+                               </span>
+                             </div>
+                           </div>
+                           <Button
+                             variant="outline"
+                             size="sm"
+                             onClick={() => setHistorySessionId(alert.session_id)}
+                             className="bg-slate-900/40 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                           >
+                             <History className="w-4 h-4 mr-2" />
+                             Переглянути чат
+                           </Button>
                          </div>
+                         
+                         {/* Відображення згенерованої JSON бази даних */}
+                         {alert.cargo_details && (
+                           <div className="bg-slate-950/50 rounded-lg p-4 border border-slate-800/50 overflow-x-auto w-full">
+                             <div className={cn(
+                               "text-xs font-semibold mb-3 uppercase tracking-wide flex items-center",
+                               isSecurityThreat ? "text-amber-500" : "text-emerald-500"
+                             )}>
+                               {isSecurityThreat ? "⚠️ ЗАГРОЗА БЕЗПЕЦІ (ПЕРЕХОПЛЕНО)" : "✓ ЗГЕНЕРОВАНА ЗАЯВКА (JSON)"}
+                             </div>
+                             <pre className="text-[12px] text-slate-400 font-mono whitespace-pre-wrap leading-relaxed">
+                               {JSON.stringify(alert.cargo_details, null, 2)}
+                             </pre>
+                           </div>
+                         )}
                        </div>
-                       <Button
-                         variant="outline"
-                         size="sm"
-                         onClick={() => setHistorySessionId(alert.session_id)}
-                         className="bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
-                       >
-                         <History className="w-4 h-4 mr-2" />
-                         Переглянути чат
-                       </Button>
-                     </div>
-                   ))}
+                     );
+                   })}
                  </div>
                ) : (
-                 <div className="bg-[#09090b]/60 border border-slate-800/60 rounded-xl p-12 flex flex-col items-center justify-center text-center text-slate-500">
-                    <BellRing className="w-12 h-12 mb-4 text-slate-700" />
-                    <p className="text-lg text-slate-300">Інцидентів немає</p>
+                 <div className="bg-slate-900/30 border border-slate-800/40 rounded-xl p-12 flex flex-col items-center justify-center text-center text-slate-500">
+                    <BellRing className="w-12 h-12 mb-4 text-slate-600" />
+                    <p className="text-lg font-medium text-slate-300">Інцидентів немає</p>
                     <p className="text-sm mt-2 max-w-md">Всі сесії обробляються автономно</p>
                  </div>
                )}

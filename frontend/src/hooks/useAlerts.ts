@@ -4,15 +4,17 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
 import { useEffect, useRef } from 'react';
-import useAuthStore from '@/store/authStore';
+import { useAuthStore } from '@/store/authStore';
 
 // Типізація для нашого алерта
 export interface Alert {
     id: string;
+    session_id: string;
     status: string;
     driver_id: string;
     created_at?: string;
     message_preview?: string;
+    cargo_details?: any;
 }
 
 // Функція для генерації "Enterprise" звуку оповіщення без аудіофайлів
@@ -42,7 +44,7 @@ const playAlertSound = () => {
 
 export const useAlerts = () => {
     const queryClient = useQueryClient();
-    const token = useAuthStore((state) => state.token);
+    const token = useAuthStore((state: any) => state.token);
     const wsRef = useRef<WebSocket | null>(null);
 
     // 1. Початкове завантаження (БЕЗ refetchInterval!)
@@ -95,6 +97,7 @@ export const useAlerts = () => {
                             // Додаємо новий алерт на початок списку
                             return [{
                                 id: data.payload.session_id,
+                                session_id: data.payload.session_id,
                                 status: data.payload.status,
                                 driver_id: data.payload.driver_id,
                                 message_preview: data.payload.message_preview,

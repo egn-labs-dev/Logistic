@@ -3,7 +3,7 @@ import logging
 from typing import Dict, List
 import os
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
-from jose import jwt, JWTError
+import jwt
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -55,13 +55,13 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
     try:
         # Валідація JWT токена з URL параметра
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        org_id = payload.get("organization_id")
+        org_id = payload.get("org_id")
         
         if not org_id:
             await websocket.close(code=1008, reason="Відсутній organization_id у токені")
             return
             
-    except JWTError:
+    except jwt.PyJWTError:
         await websocket.close(code=1008, reason="Недійсний токен авторизації")
         return
 
