@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Shield, Key, Building, Loader2, KeyRound, Bot, Copy, Plus, Trash2 } from 'lucide-react';
+import { Shield, Key, Building, Loader2, KeyRound, Bot, Copy, Plus, Trash2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import apiClient from '@/api/client';
 import { useTranslation } from 'react-i18next';
@@ -57,18 +57,23 @@ export const SettingsTab = () => {
   
   const [systemPrompt, setSystemPrompt] = useState('');
   const [isSavingPrompt, setIsSavingPrompt] = useState(false);
+  const [botToken, setBotToken] = useState('');
+  const [isSavingToken, setIsSavingToken] = useState(false);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const [keysRes, promptRes] = await Promise.all([
+        const [keysRes, settingsRes] = await Promise.all([
           apiClient.get('/settings/apikeys'),
-          apiClient.get('/settings/prompt')
+          apiClient.get('/settings')
         ]);
         setApiKeys(keysRes.data);
-        if (promptRes.data.system_prompt) {
-          setSystemPrompt(promptRes.data.system_prompt);
+        if (settingsRes.data.system_prompt) {
+          setSystemPrompt(settingsRes.data.system_prompt);
+        }
+        if (settingsRes.data.telegram_bot_token) {
+          setBotToken(settingsRes.data.telegram_bot_token);
         }
       } catch (err) {
         console.error("Failed to load settings", err);
@@ -115,12 +120,31 @@ export const SettingsTab = () => {
   const handleSavePrompt = async () => {
     setIsSavingPrompt(true);
     try {
-      await apiClient.put('/settings/prompt', { system_prompt: systemPrompt });
+      await apiClient.put('/settings', { system_prompt: systemPrompt });
       toast.success('Системний промпт успішно збережено');
     } catch {
       toast.error('Помилка збереження промпту');
     } finally {
       setIsSavingPrompt(false);
+    }
+  };
+
+  const handleSaveBotToken = async () => {
+    if (!botToken.trim()) {
+      toast.error('Токен не може бути порожнім');
+      return;
+    }
+    
+    setIsSavingToken(true);
+    try {
+      await apiClient.put('/settings', {
+        telegram_bot_token: botToken.trim()
+      });
+      toast.success('Telegram бот успішно підключено!');
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Помилка при збереженні токена');
+    } finally {
+      setIsSavingToken(false);
     }
   };
 
@@ -282,6 +306,53 @@ export const SettingsTab = () => {
                    {isSavingPrompt ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                    Зберегти правила
                  </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-[#09090b]/80 border-slate-800/60 backdrop-blur-md shadow-xl opacity-100 transition-opacity">
+            <CardHeader>
+              <CardTitle className="flex items-center text-slate-100">
+                <div className="p-1.5 bg-blue-500/10 rounded-md mr-2">
+                  <Bot className="w-5 h-5 text-blue-400" />
+                </div>
+                Інтеграція Telegram
+              </CardTitle>
+              <CardDescription className="text-slate-400">
+                Підключіть власного бота для прийому заявок від водіїв
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <KeyRound className="h-5 w-5 text-slate-500" />
+                  </div>
+                  <Input
+                    type="password"
+                    value={botToken}
+                    onChange={(e) => setBotToken(e.target.value)}
+                    placeholder="123456789:ABCdefGhIJKlmNoPQRsTuvwXyz"
+                    className="w-full bg-slate-900 border-slate-800 text-slate-200 pl-10 font-mono text-sm"
+                  />
+                </div>
+                
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900/50 p-4 rounded-lg border border-slate-800 gap-4">
+                  <div className="text-sm text-slate-400">
+                    <p>Ваш Webhook URL (для BotFather):</p>
+                    <code className="text-indigo-400 select-all mt-1 block">
+                      https://app.zt-dispatch.tech/api/v1/webhooks/telegram/{"{ВБИЙТЕ_ВАШ_ТОКЕН}"}
+                    </code>
+                  </div>
+                  <Button 
+                    onClick={handleSaveBotToken} 
+                    disabled={isSavingToken || !botToken}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white shrink-0 w-full sm:w-auto"
+                  >
+                    {isSavingToken ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                    Зберегти токен
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

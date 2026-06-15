@@ -12,29 +12,34 @@ from app.security.auth import TokenData, get_current_user_token_data
 
 router = APIRouter(prefix="/api/v1/settings", tags=["Settings"])
 
-class SystemPromptRequest(BaseModel):
+class SettingsUpdateRequest(BaseModel):
     system_prompt: Optional[str] = None
+    telegram_bot_token: Optional[str] = None
 
-class SystemPromptResponse(BaseModel):
+class SettingsResponse(BaseModel):
     system_prompt: Optional[str] = None
+    telegram_bot_token: Optional[str] = None
 
 class ApiKeyResponse(BaseModel):
     id: str
     key: str
     created_at: str
 
-@router.get("/prompt", response_model=SystemPromptResponse)
-async def get_system_prompt(token_data: TokenData = Depends(get_current_user_token_data)):
+@router.get("/", response_model=SettingsResponse)
+async def get_organization_settings(token_data: TokenData = Depends(get_current_user_token_data)):
     async with AsyncSessionLocal() as session:
         query = select(OrganizationSetting).where(OrganizationSetting.organization_id == token_data.organization_id)
         result = await session.execute(query)
         setting = result.scalar_one_or_none()
         
-        return SystemPromptResponse(system_prompt=setting.system_prompt if setting else None)
+        return SettingsResponse(
+            system_prompt=setting.system_prompt if setting else None,
+            telegram_bot_token=setting.telegram_bot_token if setting else None
+        )
 
-@router.put("/prompt", response_model=SystemPromptResponse)
-async def update_system_prompt(
-    payload: SystemPromptRequest,
+@router.put("/", response_model=SettingsResponse)
+async def update_organization_settings(
+    payload: SettingsUpdateRequest,
     token_data: TokenData = Depends(get_current_user_token_data)
 ):
     async with AsyncSessionLocal() as session:
@@ -42,17 +47,20 @@ async def update_system_prompt(
         result = await session.execute(query)
         setting = result.scalar_one_or_none()
         
-        if setting:
-            setting.system_prompt = payload.system_prompt
-        else:
-            setting = OrganizationSetting(
-                organization_id=token_data.organization_id,
-                system_prompt=payload.system_prompt
-            )
+        if not setting:
+            setting = OrganizationSetting(organization_id=token_data.organization_id)
             session.add(setting)
             
+        if payload.system_prompt is not None:
+            setting.system_prompt = payload.system_prompt
+        if payload.telegram_bot_token is not None:
+            setting.telegram_bot_token = payload.telegram_bot_token
+            
         await session.commit()
-        return SystemPromptResponse(system_prompt=setting.system_prompt)
+        return SettingsResponse(
+            system_prompt=setting.system_prompt,
+            telegram_bot_token=setting.telegram_bot_token
+        )
 
 @router.get("/apikeys", response_model=List[ApiKeyResponse])
 async def list_api_keys(token_data: TokenData = Depends(get_current_user_token_data)):
