@@ -19,8 +19,17 @@ class GeminiDispatcherService:
 
     async def analyze_dispatched_text(self, clean_text: str, custom_prompt: str = None) -> DispatcherLLMOutput:
         system_instruction = (
-            "You are a leading logistics AI dispatcher of an international freight forwarding company.\n"
+            "You are Argus, a professional AI dispatcher of an international freight forwarding company.\n"
             "Analyze the input text and structure it according to the provided JSON schema.\n\n"
+            "CLARIFICATION RULES:\n"
+            "1. Critical cargo parameters: Route (departure/destination), Weight (tons), and Body Type.\n"
+            "2. If ANY critical parameter is MISSING:\n"
+            "   - Set `is_qualified_lead` = false.\n"
+            "   - In the `response_to_user` field, write a short, polite clarifying question (e.g., 'Підкажіть, яка у вас вантажопідйомність та тип кузова?').\n"
+            "3. If all critical parameters are present:\n"
+            "   - Set `is_qualified_lead` = true.\n"
+            "   - In the `response_to_user` field, write a confirmation (e.g., 'Дякую, фіксую ваш транспорт. Передаю інформацію брокерам.').\n"
+            "4. Numbers: If numerical parameters (temperature, weight) are not explicitly stated, return `null` (not 0.0). Use `0.0` ONLY if the driver explicitly wrote zero degrees.\n\n"
             "PARAMETER DETERMINATION RULES:\n"
             "1. Weight Conversion: Always record the weight in TONS in the weight_tons field. If the client writes '500 kg', write 0.5. If '20 tons', write 20.0.\n"
             "2. Body Type (body_type_required): If perishable goods or deep freezing is mentioned, set 'refrigerator'. If regular boxes or pallets, set 'tent'. If oversized cargo or pipes, set 'platform'.\n"
@@ -83,7 +92,7 @@ class GeminiDispatcherService:
                     weight_tons=0.0,
                     dimensions=CargoDimensions(length_m=0.0, width_m=0.0, height_m=0.0, volume_m3=0.0),
                     body_type_required=BodyType.NOT_SPECIFIED,
-                    temperature_control=TemperatureRegime(is_required=False, min_celsius=0.0, max_celsius=0.0),
+                    temperature_control=TemperatureRegime(is_required=False, min_celsius=None, max_celsius=None),
                     adr_specification=ADRDetails(is_dangerous=False, adr_class=""),
                     detected_placeholders=[]
                 ),

@@ -15,8 +15,8 @@ class BodyType(str, Enum):
 
 class TemperatureRegime(BaseModel):
     is_required: bool = Field(description="Is temperature control required (for reefers)")
-    min_celsius: float = Field(description="Minimum temperature in degrees Celsius. Return 0.0 if not specified.")
-    max_celsius: float = Field(description="Maximum temperature in degrees Celsius. Return 0.0 if not specified.")
+    min_celsius: Optional[float] = Field(default=None, description="Minimum temperature in degrees Celsius. Return null if not specified.")
+    max_celsius: Optional[float] = Field(default=None, description="Maximum temperature in degrees Celsius. Return null if not specified.")
 
 class CargoDimensions(BaseModel):
     length_m: float = Field(description="Length in meters. Return 0.0 if not specified.")

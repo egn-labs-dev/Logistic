@@ -503,8 +503,9 @@ export const Dashboard = () => {
                                          <div>
                                            <div className="text-[10px] text-blue-400/70 uppercase font-semibold">Температурний режим</div>
                                            <div className="text-sm font-medium text-blue-300">
-                                             {alert.cargo_details.temperature_control.min_temp_celsius !== undefined ? `Від ${alert.cargo_details.temperature_control.min_temp_celsius}°C ` : ''}
-                                             {alert.cargo_details.temperature_control.max_temp_celsius !== undefined ? `до ${alert.cargo_details.temperature_control.max_temp_celsius}°C` : ''}
+                                             {alert.cargo_details.temperature_control.min_celsius !== null && alert.cargo_details.temperature_control.min_celsius !== undefined 
+                                               ? `Від ${alert.cargo_details.temperature_control.min_celsius}°C до ${alert.cargo_details.temperature_control.max_celsius}°C` 
+                                               : 'Рефрижератор (градуси не вказані)'}
                                            </div>
                                          </div>
                                        </div>
