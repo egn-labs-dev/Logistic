@@ -66,6 +66,8 @@ class OrganizationSetting(Base):
     system_prompt: Mapped[str] = mapped_column(Text, nullable=True)
     stripe_item_id: Mapped[str] = mapped_column(String, nullable=True, index=True)
     telegram_bot_token: Mapped[str] = mapped_column(String, unique=True, nullable=True, index=True)
+    viber_bot_token: Mapped[str] = mapped_column(String, unique=True, nullable=True, index=True)
+    whatsapp_api_token: Mapped[str] = mapped_column(String, unique=True, nullable=True, index=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class WaitlistLead(Base):
