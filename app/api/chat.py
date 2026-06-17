@@ -25,8 +25,9 @@ async def process_secure_message(
     organization_id: str = Depends(get_organization_from_api_key)
 ):
     try:
-        # Check for human interception before any other actions
+        # Відкриваємо єдину RLS-сесію для всього життєвого циклу повідомлення
         async with get_db_session_with_rls(organization_id) as session:
+            # 1. Перевірка статусу human_controlled
             query = select(CargoOrder).where(CargoOrder.session_id == payload.session_id).order_by(CargoOrder.created_at.desc()).limit(1)
             result = await session.execute(query)
             existing_order = result.scalar_one_or_none()
@@ -44,46 +45,44 @@ async def process_secure_message(
             org_setting = prompt_res.scalar_one_or_none()
             custom_prompt = org_setting.system_prompt if org_setting else None
 
-        # Security and LLM Processing Block
-        is_security_violation = False
-        final_response_text = ""
-        order_status = "active_chat"
-        extracted_data_dump = "{}"
-        clean_text_for_audit = payload.text
-        vault_snapshot_for_audit = {}
+            # Security and LLM Processing Block
+            is_security_violation = False
+            final_response_text = ""
+            order_status = "active_chat"
+            extracted_data_dump = "{}"
+            clean_text_for_audit = payload.text
+            vault_snapshot_for_audit = {}
 
-        try:
-            # Step 0: Prompt Injection Shield
-            validate_against_injection(payload.text)
+            try:
+                # Step 0: Prompt Injection Shield
+                validate_against_injection(payload.text)
 
-            # Step 1: Local Data Scrubbing
-            scrubbed = DataScrubber.anonymize(payload.text)
-            clean_text_for_audit = scrubbed.clean_text
-            vault_snapshot_for_audit = scrubbed.vault
-            
-            # Step 2: Pass scrubbed text to Gemini
-            llm_output = await gemini_service.analyze_dispatched_text(scrubbed.clean_text, custom_prompt)
-            
-            if llm_output.requires_human_intervention:
-                order_status = "human_required"
-            else:
-                order_status = "qualified_lead" if llm_output.is_qualified_lead else "active_chat"
+                # Step 1: Local Data Scrubbing
+                scrubbed = DataScrubber.anonymize(payload.text)
+                clean_text_for_audit = scrubbed.clean_text
+                vault_snapshot_for_audit = scrubbed.vault
                 
-            extracted_data_dump = llm_output.extracted_data.model_dump_json()
-            final_response_text = DataScrubber.deanonymize(llm_output.response_to_user, scrubbed.vault)
-            
-        except HTTPException as he:
-            if he.status_code == 400:
-                is_security_violation = True
-                order_status = "human_required"
-                final_response_text = "🚨 [Security System] Спроба маніпуляції заблокована. Запит відхилено."
-                extracted_data_dump = json.dumps({"error": "Prompt Injection Detected", "raw_input": payload.text})
-            else:
-                raise he
+                # Step 2: Pass scrubbed text to Gemini
+                llm_output = await gemini_service.analyze_dispatched_text(scrubbed.clean_text, custom_prompt)
+                
+                if llm_output.requires_human_intervention:
+                    order_status = "human_required"
+                else:
+                    order_status = "qualified_lead" if llm_output.is_qualified_lead else "active_chat"
+                    
+                extracted_data_dump = llm_output.extracted_data.model_dump_json()
+                final_response_text = DataScrubber.deanonymize(llm_output.response_to_user, scrubbed.vault)
+                
+            except HTTPException as he:
+                if he.status_code == 400:
+                    is_security_violation = True
+                    order_status = "human_required"
+                    final_response_text = "🚨 [Security System] Спроба маніпуляції заблокована. Запит відхилено."
+                    extracted_data_dump = json.dumps({"error": "Prompt Injection Detected", "raw_input": payload.text})
+                else:
+                    raise he
 
-        # Step 3: Asynchronous database writing protected by RLS
-        async with get_db_session_with_rls(organization_id) as session:
-            # Save structured data to CargoOrder
+            # Step 3: Збереження в базі в межах тієї ж самої сесії
             new_order = CargoOrder(
                 organization_id=organization_id,
                 session_id=payload.session_id,
@@ -101,6 +100,8 @@ async def process_secure_message(
                 vault_snapshot=vault_snapshot_for_audit
             )
             session.add(audit_entry)
+            
+            await session.commit()
 
         # [НОВИЙ КОД] Відправляємо Push-сповіщення диспетчерам
         if order_status == "human_required":

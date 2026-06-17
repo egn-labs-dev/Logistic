@@ -5,6 +5,7 @@ import httpx
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, Depends, Query, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from async_lru import alru_cache
 
 from app.api.chat import process_secure_message
 from app.db.database import AsyncSessionLocal
@@ -14,6 +15,21 @@ from app.security.injection_shield import validate_against_injection
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/webhooks", tags=["Webhooks"])
+
+@alru_cache(maxsize=1000, ttl=600)
+async def get_cached_tenant_id(token: str, platform: str) -> str | None:
+    async with AsyncSessionLocal() as db:
+        if platform == "telegram":
+            stmt = select(OrganizationSetting.organization_id).where(OrganizationSetting.telegram_bot_token == token)
+        elif platform == "viber":
+            stmt = select(OrganizationSetting.organization_id).where(OrganizationSetting.viber_bot_token == token)
+        elif platform == "whatsapp":
+            stmt = select(OrganizationSetting.organization_id).where(OrganizationSetting.whatsapp_api_token == token)
+        else:
+            return None
+            
+        result = await db.execute(stmt)
+        return result.scalar_one_or_none()
 
 # ==========================================
 # TELEGRAM INTEGRATION
@@ -32,13 +48,7 @@ async def telegram_webhook(
 ):
     """Мультитенантний вебхук: визначає компанію за токеном її бота"""
     
-    # Шукаємо організацію, якій належить цей бот
-    async with AsyncSessionLocal() as session:
-        result = await session.execute(
-            select(OrganizationSetting.organization_id)
-            .where(OrganizationSetting.telegram_bot_token == secret_bot_token)
-        )
-        tenant_id = result.scalar_one_or_none()
+    tenant_id = await get_cached_tenant_id(secret_bot_token, "telegram")
 
     if not tenant_id:
         raise HTTPException(status_code=403, detail="Invalid or unregistered bot token")
@@ -98,12 +108,7 @@ async def viber_webhook(
     background_tasks: BackgroundTasks
 ):
     """Мультитенантний вебхук для Viber"""
-    async with AsyncSessionLocal() as session:
-        result = await session.execute(
-            select(OrganizationSetting.organization_id)
-            .where(OrganizationSetting.viber_bot_token == secret_bot_token)
-        )
-        tenant_id = result.scalar_one_or_none()
+    tenant_id = await get_cached_tenant_id(secret_bot_token, "viber")
 
     if not tenant_id:
         raise HTTPException(status_code=403, detail="Invalid Viber token")
@@ -175,12 +180,7 @@ async def whatsapp_webhook(
     background_tasks: BackgroundTasks
 ):
     """Мультитенантний вебхук для WhatsApp"""
-    async with AsyncSessionLocal() as session:
-        result = await session.execute(
-            select(OrganizationSetting.organization_id)
-            .where(OrganizationSetting.whatsapp_api_token == secret_api_token)
-        )
-        tenant_id = result.scalar_one_or_none()
+    tenant_id = await get_cached_tenant_id(secret_api_token, "whatsapp")
 
     if not tenant_id:
         raise HTTPException(status_code=403, detail="Invalid WhatsApp token")
